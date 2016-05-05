@@ -32,7 +32,7 @@ int main()
 
 	cout << endl;
 
-	delete matrix;
+	//delete matrix;
 
 	return 0;
 }
