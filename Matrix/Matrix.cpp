@@ -43,6 +43,7 @@ Matrix::Matrix(Matrix* matrix)
 
 Matrix::~Matrix()
 {
+	cout << "Destroyed" << endl;
     for(int i = 0; i < this->rows; i++) 
     {	
 		cout << i << " ";
@@ -51,17 +52,17 @@ Matrix::~Matrix()
 	delete[] this->entries;
 }
 
-unsigned int Matrix::getRows()
+unsigned int Matrix::getRows() const
 {
     return this->rows;
 }
 
-unsigned int Matrix::getColumns()
+unsigned int Matrix::getColumns() const
 {
     return this->columns;
 }
 
-double Matrix::getEntry(int row, int column)
+double Matrix::getEntry(int row, int column) const
 {
     return this->entries[row][column];
 }
@@ -72,73 +73,49 @@ void Matrix::setEntry(int row, int column, double value)
     this->entries[row][column] = value;
 }
 
-Matrix* Matrix::add(Matrix* that)
+Matrix Matrix::operator+(const Matrix& that)
 {
-    //TODO - if incompatible sizes, throw exception
+	  //TODO - if incompatible sizes, throw exception
 
-    Matrix* copy = new Matrix(this);
+    Matrix copy(this->rows, this->columns);
     
     for(int i = 0; i < this->getRows(); i++)
     {
         for(int j = 0; j < this->getColumns(); j++)
         {
-            copy->setEntry(i, j, this->getEntry(i, j) + that->getEntry(i,j) );
+            copy.setEntry(i, j, this->entries[i][j] + that.entries[i][j] );
         }
     }    
     
-    return copy;    
+    return copy;  
 }
 
 //TODO make sure you mark what's const and what's not
-Matrix* Matrix::subtract(Matrix* that)
+Matrix Matrix::operator-(const Matrix& that)
 {
     //TODO - if incompatible sizes, throw exception
-    Matrix* temp = that->scale(-1.0);
-    Matrix* result = this->add(temp);
-    
-    delete temp;
-    
-    return result;
-    
-    
-    //Is there performance penalty vs below?
-//     Matrix* copy = new Matrix(this);
-//     
-//     for(int i = 0; i < this->getRows(); i++)
-//     {
-//         for(int j = 0; j < this->getColumns(); j++)
-//         {
-//             copy->setEntry(i, j, this->getEntry(i, j) - that->getEntry(i,j) );
-//         }
-//     }    
-//     
-//     return copy;    
-}
+	//TODO reuse addition?
 
-Matrix* Matrix::scale(double scalar)
-{
-    //TODO - if incompatible sizes, throw exception
-
-    Matrix* copy = new Matrix(this);
+    Matrix copy(this->rows, this->columns);
     
     for(int i = 0; i < this->getRows(); i++)
     {
         for(int j = 0; j < this->getColumns(); j++)
         {
-            copy->setEntry(i, j,  this->getEntry(i, j) * scalar );
+            copy.setEntry(i, j, this->entries[i][j] - that.entries[i][j] );
         }
     }    
     
-    return copy;
+    return copy;   
 }
 
-Matrix* Matrix::multiply(Matrix* that)
+Matrix Matrix::operator*(const Matrix& that)
 {
-    //TODO dimension requirements (A by B) x (B by C)
+	   //TODO dimension requirements (A by B) x (B by C)
     int newRows = this->getRows();
-    int newColumns = that->getColumns();
+    int newColumns = that.columns;
 
-    Matrix* product = new Matrix( newRows, newColumns );
+    Matrix product( newRows, newColumns );
     
     double newValue = 0.0;
     
@@ -148,10 +125,10 @@ Matrix* Matrix::multiply(Matrix* that)
         {
             for(int k = 0; k < this->getColumns(); k++)
             {
-                newValue += this->getEntry(i, k) * that->getEntry(k, j);
+                newValue += (*this)(i, k) * that(k,j);
             }
             
-            product->setEntry(i, j, newValue);
+            product.setEntry(i, j, newValue);
             
             newValue = 0.0;
         }    
@@ -177,14 +154,39 @@ std::string Matrix::toString()
 	return result;
 }
 
-//Private Methods
-void Matrix::scaleInPlace(double scalar)
+double Matrix::operator()(int row, int column) const
 {
-    for(int i = 0; i < this->getRows(); i++)
+	//TODO bounds checking
+	return this->entries[row][column];
+}
+
+Matrix operator*(const Matrix& that, double scalar)
+{
+    Matrix copy(that.getRows(), that.getColumns());
+    
+    for(int i = 0; i < that.getRows(); i++)
     {
-        for(int j = 0; j < this->getColumns(); j++)
+        for(int j = 0; j < that.getColumns(); j++)
         {
-            this->setEntry(i, j,  this->getEntry(i, j) * scalar );
+            copy.setEntry(i, j,  that(i,j) * scalar );
         }
-    }        
+    }    
+    
+    return copy;
+}
+
+Matrix operator*(double scalar, const Matrix& that)
+{
+//TODO reuse above?
+     Matrix copy(that.getRows(), that.getColumns());
+    
+    for(int i = 0; i < that.getRows(); i++)
+    {
+        for(int j = 0; j < that.getColumns(); j++)
+        {
+            copy.setEntry(i, j,  that.getEntry(i,j) * scalar );
+        }
+    }    
+    
+    return copy;
 }
