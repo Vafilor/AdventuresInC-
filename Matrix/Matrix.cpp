@@ -1,15 +1,26 @@
+//Matrix.cpp
+//By Andrey Melnikov
+
 #include "Matrix.h"
 #include <iostream> //For debugging
 #include <string>
 using namespace std; //For debugging
 
+Matrix::Matrix()
+{
+	this->entries = NULL;
+	this->rows = 0;
+	this->columns = 0;
+}
+
 Matrix::Matrix(unsigned int rows, unsigned int columns)
 {
+	//TODO throw exceptions for 0 by A or B by 0 matrices.
     double** data = new double*[rows];
     
     for(int i = 0; i < rows; i++) 
     {
-        data[i] = new double[columns]; //TODO can you auto initialize dynamic arrays?
+        data[i] = new double[columns]; 
         
         for(int j = 0; j < columns; j++) 
         {
@@ -22,58 +33,43 @@ Matrix::Matrix(unsigned int rows, unsigned int columns)
     this->columns = columns;
 }
 
-Matrix::Matrix(Matrix* matrix)
+Matrix::Matrix(const Matrix& that)
 {
-    double** data = new double*[matrix->getRows()];
-    
-    for(int i = 0; i < matrix->getRows(); i++)
-    {
-        data[i] = new double[matrix->getColumns()];
-        
-        for(int j = 0; j < matrix->getColumns(); j++)
-        {
-            data[i][j] = matrix->getEntry(i,j);
-        }
-    }
-    
-    this->entries = data;
-    this->rows = matrix->getRows();
-    this->columns = matrix->getColumns();
+	this->rows = that.rows;
+	this->columns = that.columns;
+
+	this->entries = new double*[this->rows];
+	
+	for(int i = 0; i < this->rows; i++)
+	{
+		this->entries[i] = new double[this->columns];
+
+		for(int j = 0; j < this->columns; j++)
+		{
+			this->entries[i][j] = that.entries[i][j];
+		}
+	}
 }
 
 Matrix::~Matrix()
 {
-	cout << "Destroyed" << endl;
-    for(int i = 0; i < this->rows; i++) 
+	this->freeEntriesMemory();
+}
+
+void Matrix::freeEntriesMemory()
+{
+	for(int i = 0; i < this->rows; i++) 
     {	
-		cout << i << " ";
         delete[] this->entries[i];
     }
-	delete[] this->entries;
+
+	if(this->rows > 0 && this->columns > 0) 
+	{
+		delete[] this->entries;
+	}
 }
 
-unsigned int Matrix::getRows() const
-{
-    return this->rows;
-}
-
-unsigned int Matrix::getColumns() const
-{
-    return this->columns;
-}
-
-double Matrix::getEntry(int row, int column) const
-{
-    return this->entries[row][column];
-}
-
-
-void Matrix::setEntry(int row, int column, double value)
-{
-    this->entries[row][column] = value;
-}
-
-Matrix Matrix::operator+(const Matrix& that)
+Matrix Matrix::operator+(const Matrix& that) const
 {
 	  //TODO - if incompatible sizes, throw exception
 
@@ -83,35 +79,16 @@ Matrix Matrix::operator+(const Matrix& that)
     {
         for(int j = 0; j < this->getColumns(); j++)
         {
-            copy.setEntry(i, j, this->entries[i][j] + that.entries[i][j] );
+            copy.entries[i][j] = this->entries[i][j] + that.entries[i][j];
         }
     }    
     
     return copy;  
 }
 
-//TODO make sure you mark what's const and what's not
-Matrix Matrix::operator-(const Matrix& that)
+Matrix Matrix::operator*(const Matrix& that) const
 {
-    //TODO - if incompatible sizes, throw exception
-	//TODO reuse addition?
-
-    Matrix copy(this->rows, this->columns);
-    
-    for(int i = 0; i < this->getRows(); i++)
-    {
-        for(int j = 0; j < this->getColumns(); j++)
-        {
-            copy.setEntry(i, j, this->entries[i][j] - that.entries[i][j] );
-        }
-    }    
-    
-    return copy;   
-}
-
-Matrix Matrix::operator*(const Matrix& that)
-{
-	   //TODO dimension requirements (A by B) x (B by C)
+	//TODO dimension requirements (A by B) x (B by C)
     int newRows = this->getRows();
     int newColumns = that.columns;
 
@@ -125,10 +102,10 @@ Matrix Matrix::operator*(const Matrix& that)
         {
             for(int k = 0; k < this->getColumns(); k++)
             {
-                newValue += (*this)(i, k) * that(k,j);
+                newValue += this->entries[i][k] * that.entries[k][j];
             }
             
-            product.setEntry(i, j, newValue);
+            product.entries[i][j] = newValue;
             
             newValue = 0.0;
         }    
@@ -137,56 +114,141 @@ Matrix Matrix::operator*(const Matrix& that)
     return product;
 }
 
-std::string Matrix::toString()
+Matrix Matrix::operator=(const Matrix& that) 
 {
-	std::string result = "";
+	this->rows = that.rows;
+	this->columns = that.columns;
+
+	this->freeEntriesMemory();
+
+	this->entries = new double*[this->rows];
 	
-	for(int i = 0; i < this->getRows(); i++)
+	for(int i = 0; i < this->rows; i++)
 	{
-		for(int j = 0; j < this->getColumns(); j++)
+		this->entries[i] = new double[this->columns];
+
+		for(int j = 0; j < this->columns; j++)
 		{
-			result += std::to_string(this->getEntry(i,j)) + " ";
+			this->entries[i][j] = that.entries[i][j];	
 		}
-		
-		result += "\n";
 	}
-	
-	return result;
 }
 
-double Matrix::operator()(int row, int column) const
+void Matrix::applyFunction(double (*function)(double entry) )
 {
-	//TODO bounds checking
-	return this->entries[row][column];
+	for(int i = 0; i < this->rows; i++)
+	{
+		for(int j = 0; j < this->columns; j++)
+		{
+			this->entries[i][j] = function(this->entries[i][j]);
+		}
+	}
 }
 
 Matrix operator*(const Matrix& that, double scalar)
 {
-    Matrix copy(that.getRows(), that.getColumns());
+    Matrix copy = Matrix::createUninitializedMatrix(that.rows, that.columns);
     
     for(int i = 0; i < that.getRows(); i++)
     {
         for(int j = 0; j < that.getColumns(); j++)
         {
-            copy.setEntry(i, j,  that(i,j) * scalar );
+            copy.entries[i][j] = that.entries[i][j] * scalar;
         }
     }    
     
     return copy;
 }
 
-Matrix operator*(double scalar, const Matrix& that)
+bool operator==(const Matrix & a, const Matrix& b)
 {
-//TODO reuse above?
-     Matrix copy(that.getRows(), that.getColumns());
-    
-    for(int i = 0; i < that.getRows(); i++)
-    {
-        for(int j = 0; j < that.getColumns(); j++)
-        {
-            copy.setEntry(i, j,  that.getEntry(i,j) * scalar );
-        }
-    }    
-    
-    return copy;
+	if(a.rows != b.rows || a.columns != b.columns)
+	{
+		return false;
+	}
+
+	for(int i = 0; i < a.rows; i++)
+	{
+		for(int j = 0; j < a.columns; j++)
+		{
+			if(a.entries[i][j] != b.entries[i][j])
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
+
+std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
+{
+	for(int i = 0; i < matrix.rows; i++)
+	{
+		for(int j = 0; j < matrix.columns; j++)
+		{
+			output << matrix.entries[i][j] << " ";
+		}
+
+		output << endl;
+	}
+	return output;
+}
+
+const Matrix& Matrix::operator*=(double scalar)
+{
+	for(int i = 0; i < this->rows; i++)
+	{
+		for(int j = 0; j < this->columns; j++)
+		{
+			this->entries[i][j] *= scalar;
+		}
+	}
+}
+
+const Matrix& Matrix::operator+=(const Matrix& that)
+{
+	for(int i = 0; i < this->rows; i++)
+	{
+		for(int j = 0; j < this->columns; j++)
+		{
+			this->entries[i][j] += that.entries[i][j];
+		}
+	}
+}
+
+//TODO use this in other places
+Matrix Matrix::createUninitializedMatrix(unsigned int rows, unsigned int columns)
+{
+	//TODO result() no work?
+	Matrix result;
+	
+	result.rows = rows;
+	result.columns = columns;
+
+	result.entries = new double*[rows];
+
+	for(int i = 0; i < rows; i++)
+	{
+		result.entries[i] = new double[columns];
+	}
+
+	return result;
+}
+
+Matrix Matrix::transpose()
+{
+	//TODO Spelling
+	Matrix transpose = createUninitializedMatrix(this->columns, this->rows);
+
+	for(int i = 0; i < transpose.rows; i++)
+	{
+		for(int j = 0; j < transpose.columns; j++)
+		{
+			transpose.entries[i][j] = this->entries[j][i];
+		}
+	}
+	
+	return transpose;
+}
+

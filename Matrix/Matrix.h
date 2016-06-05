@@ -1,7 +1,10 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+//Matrix.h
+//By Andrey Melnikov
 
 #include <string>
+
+#ifndef MATRIX_H
+#define MATRIX_H
 
 class Matrix
 {
@@ -10,30 +13,116 @@ class Matrix
         unsigned int rows;
         unsigned int columns;
         
-        //TODO static method that determines if matrix sizes match
+		void freeEntriesMemory();
 
+		//Static Utilities
+		//Helper method that creates a matrix of rows x columns size, but where each value is not initialized to save precious cpu cycles
+		static Matrix createUninitializedMatrix(unsigned int rows, unsigned int columns);
         
     public:
+
+		//Constructors & Destructor
+
+		Matrix();
         Matrix(unsigned int rows, unsigned int columns);
-        Matrix(Matrix* that);
+        Matrix(const Matrix& that);
         ~Matrix();
         
-        //TODO make a public static method to generate identity matrix for some size and fill with random
-        //values - one where random values are provided by some generator too.
-        unsigned int getRows() const;
-        unsigned int getColumns() const;
-        double getEntry(int row, int column) const; 
-        void setEntry(int row, int column, double value);
-        //Make operator versions of these. Want A + B, A - B
-		Matrix operator+(const Matrix& that);
-        Matrix operator-(const Matrix& that);
-		Matrix operator*(const Matrix& that);
-		double operator()(int row, int column) const;
-        std::string toString();
 
+		//Getters & Setters
+        inline unsigned int getRows() const;
+        inline unsigned int getColumns() const;
+		inline double & operator()(unsigned int row, unsigned int column);
+		inline const double & operator()(unsigned int row, unsigned int column) const;
+
+		//Unary Operators & Methods
+		
+		//Returns a matrix where each entry is the negative of the current matrix entry
+		//i.e New(i,j) = -Old(i,j)
+		inline Matrix operator-() const;
+
+		//Returns a transpose of the current matrix.
+		//i.e. New(i,j) = Old(j,i)
+		Matrix transpose();
+
+		//Binary Operators & Methods
+
+		//Returns a matrix where each entry is the sum of this and that matrices
+		//i.e. New(i,j) = this(i,j) + that(i,j)
+		Matrix operator+(const Matrix& that) const;
+        inline Matrix operator-(const Matrix& that) const;
+		Matrix operator*(const Matrix& that) const;
+		Matrix operator=(const Matrix& that);
+
+		const Matrix& operator*=(double scalar);
+		inline const Matrix& operator/=(double scalar);
+		const Matrix& operator+=(const Matrix& that);
+		inline const Matrix& operator-=(const Matrix& that);
+
+		//Friend Functions
+
+		friend Matrix operator*(const Matrix& that, double scalar);
+		inline friend Matrix operator*(double scalar, const Matrix& that);
+
+		friend bool operator==(const Matrix & a, const Matrix & b);
+		//TODO can ostream not be const input and output? Either?
+		friend std::ostream & operator<<(std::ostream & output, const Matrix & matrix);
+
+
+		/*
+		 *Replace each entry in the matrix with the result of the 
+		 *passed in function where the argument to the function is the matrix entry 
+		*/
+		void applyFunction(double (*function)(double entry) );
 };
 
-Matrix operator*(const Matrix& that, double scalar);
-Matrix operator*(double scalar, const Matrix& that);
+//Inline functions
+
+Matrix Matrix::operator-(const Matrix& that) const
+{
+	return (*this) + (-that);
+}
+
+double& Matrix::operator()(unsigned int row, unsigned int column) 
+{
+	//TODO bounds checking?
+	return this->entries[row][column];
+}
+
+const double& Matrix::operator()(unsigned int row, unsigned int column) const 
+{
+	//TODO bounds checking?
+	return this->entries[row][column];
+}
+
+unsigned int Matrix::getRows() const 
+{	
+	return this->rows;
+}
+
+unsigned int Matrix::getColumns() const 
+{
+	return this->columns;
+}
+
+Matrix Matrix::operator-() const 
+{ 
+	return (*this) * -1.0; 
+}
+
+const Matrix& Matrix::operator/=(double scalar) 
+{
+	return (*this) *= 1.0/scalar; 
+}
+
+const Matrix& Matrix::operator-=(const Matrix& that)
+{
+	return (*this) += -that; 
+}
+
+Matrix operator*(double scalar, const Matrix& that)
+{
+	return that * scalar;
+}
 
 #endif
