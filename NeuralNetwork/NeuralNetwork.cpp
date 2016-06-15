@@ -7,7 +7,8 @@
 
 using namespace std;
 
-NeuralNetwork::NeuralNetwork(vector<int> layerSizes) //TODO variadic constructor?
+
+NeuralNetwork::NeuralNetwork(const vector<int>& layerSizes) //TODO variadic constructor?
 {
 	for(int i = 0; i < layerSizes.size(); i++)
 	{
@@ -33,7 +34,7 @@ NeuralNetwork::~NeuralNetwork()
 
 
 //TODO note exceptions thrown
-Matrix NeuralNetwork::feedForward(Matrix input)
+Matrix NeuralNetwork::feedForward(const Matrix& input)
 {	
 	Matrix result = input;
 
@@ -63,6 +64,43 @@ Matrix NeuralNetwork::feedForward(Matrix input)
         //return a
 }
 
+int NeuralNetwork::evaluate(const vector< pair<const Matrix&, const Matrix& > >& testData)
+{
+//TODO ensure that the correct length is initially reserved
+	vector<int> testResults( testData.size() );
+	Matrix result;
+	
+	for(int i = 0; i < testData.size(); i++)
+	{
+		result = this->feedForward( testData[i].first() );
+		
+		
+	}
+
+// 
+//         Matrix result = null;
+// 
+//         for(int i = 0; i < testData.size(); i++)
+//         {
+//             result = this.feedforward(testData.get(i).getFirstElement());
+// 
+//             testResults.add(this.getLargestRow(result));
+//         }
+// 
+//         int totalCorrect = 0;
+// 
+// 		//TODO make this a separate method
+//         for(int i = 0; i < testData.size(); i++)
+//         {
+//             if( testResults.get(i) == this.getNonZeroRow(testData.get(i).getSecondElement()) )
+//             {
+//                 totalCorrect++;
+//             }
+//         }
+// 
+//         return totalCorrect;
+}
+
 double sigmoid(double value)
 {
 	return 1.0 / ( 1.0 + exp(-value) );
@@ -89,4 +127,27 @@ Matrix NeuralNetwork::gaussianDistribution(unsigned rows, unsigned columns)
 	}	
 
 	return matrix;
+}
+
+Matrix NeuralNetwork::costDerivative(const Matrix& outputActiviations, const Matrix& output)
+{
+	return outputActivations - output;
+}
+
+unsigned int NeuralNetwork::getLargestRow(const Matrix& matrix)
+{
+	unsigned int largest = 0;
+	
+	double largestValue = matrix(largest, 0);
+	
+	for(int i = 0; i < matrix.getRows(); i++)
+	{
+		if( matrix(i, 0) > largestValue ) 
+		{
+			largest = i;
+			largestValue = matrix(i, 0);
+		}
+	}
+	
+	return largest;
 }
