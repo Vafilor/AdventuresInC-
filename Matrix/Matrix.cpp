@@ -1,7 +1,8 @@
 //Matrix.cpp
 //By Andrey Melnikov
 
-#include "Matrix.h"
+#include "Matrix.hpp"
+#include <stdexcept>
 #include <iostream> //For debugging
 #include <string>
 using namespace std; //For debugging
@@ -13,9 +14,13 @@ Matrix::Matrix()
 	this->columns = 0;
 }
 
-Matrix::Matrix(unsigned int rows, unsigned int columns)
+Matrix::Matrix(unsigned int rows, unsigned int columns) throw(invalid_argument)
 {
-	//TODO throw exceptions for 0 by A or B by 0 matrices.
+	if(rows == 0 || columns == 0)
+	{
+		throw invalid_argument("rows or columns is 0");
+	}
+
     double** data = new double*[rows];
     
     for(int i = 0; i < rows; i++) 
@@ -69,9 +74,12 @@ void Matrix::freeEntriesMemory()
 	}
 }
 
-Matrix Matrix::operator+(const Matrix& that) const
+Matrix Matrix::operator+(const Matrix& that) const throw(invalid_argument)
 {
-	  //TODO - if incompatible sizes, throw exception
+	if(this->rows != that.rows || this->columns != that.columns)
+	{
+		throw invalid_argument("Matrix summation not defined for matrices");
+	}
 
     Matrix copy(this->rows, this->columns);
     
@@ -86,9 +94,13 @@ Matrix Matrix::operator+(const Matrix& that) const
     return copy;  
 }
 
-Matrix Matrix::operator*(const Matrix& that) const
+Matrix Matrix::operator*(const Matrix& that) const throw(invalid_argument)
 {
-	//TODO dimension requirements (A by B) x (B by C)
+	if(this->columns != that.rows)
+	{
+		throw invalid_argument("Matrix Multiplication not defined for incoming matrix");
+	}	
+
     int newRows = this->getRows();
     int newColumns = that.columns;
 
@@ -134,7 +146,7 @@ Matrix Matrix::operator=(const Matrix& that)
 	}
 }
 
-void Matrix::applyFunction(double (*function)(double entry) )
+void Matrix::applyFunctionInto(double (*function)(double entry) )
 {
 	for(int i = 0; i < this->rows; i++)
 	{
@@ -206,8 +218,13 @@ const Matrix& Matrix::operator*=(double scalar)
 	}
 }
 
-const Matrix& Matrix::operator+=(const Matrix& that)
+const Matrix& Matrix::operator+=(const Matrix& that) throw(invalid_argument)
 {
+	if(this->rows != that.rows || this->columns != that.columns)
+	{
+		throw invalid_argument("Matrix += not defined with incoming matrix");
+	}
+
 	for(int i = 0; i < this->rows; i++)
 	{
 		for(int j = 0; j < this->columns; j++)
@@ -217,10 +234,8 @@ const Matrix& Matrix::operator+=(const Matrix& that)
 	}
 }
 
-//TODO use this in other places
 Matrix Matrix::createUninitializedMatrix(unsigned int rows, unsigned int columns)
 {
-	//TODO result() no work?
 	Matrix result;
 	
 	result.rows = rows;
@@ -238,7 +253,6 @@ Matrix Matrix::createUninitializedMatrix(unsigned int rows, unsigned int columns
 
 Matrix Matrix::transpose()
 {
-	//TODO Spelling
 	Matrix transpose = createUninitializedMatrix(this->columns, this->rows);
 
 	for(int i = 0; i < transpose.rows; i++)
