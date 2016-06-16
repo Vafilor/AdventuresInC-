@@ -126,8 +126,7 @@ Matrix Matrix::operator*(const Matrix& that) const throw(invalid_argument)
     return product;
 }
 
-//TOOD should return type be reference or const ref?
-Matrix& Matrix::operator=(const Matrix& that) 
+Matrix Matrix::operator=(const Matrix& that) 
 {
 	this->rows = that.rows;
 	this->columns = that.columns;
@@ -145,8 +144,6 @@ Matrix& Matrix::operator=(const Matrix& that)
 			this->entries[i][j] = that.entries[i][j];	
 		}
 	}
-	
-	return *this;
 }
 
 void Matrix::applyFunctionInto(double (*function)(double entry) )
@@ -158,6 +155,15 @@ void Matrix::applyFunctionInto(double (*function)(double entry) )
 			this->entries[i][j] = function(this->entries[i][j]);
 		}
 	}
+}
+
+Matrix Matrix::applyFunction( double (*function)(double entry) )
+{
+	Matrix copy(*this);
+
+	copy.applyFunctionInto(function);
+
+	return copy;
 }
 
 Matrix operator*(const Matrix& that, double scalar)
@@ -219,8 +225,6 @@ const Matrix& Matrix::operator*=(double scalar)
 			this->entries[i][j] *= scalar;
 		}
 	}
-	
-	return *this;
 }
 
 const Matrix& Matrix::operator+=(const Matrix& that) throw(invalid_argument)
@@ -237,8 +241,6 @@ const Matrix& Matrix::operator+=(const Matrix& that) throw(invalid_argument)
 			this->entries[i][j] += that.entries[i][j];
 		}
 	}
-	
-	return *this;
 }
 
 Matrix Matrix::createUninitializedMatrix(unsigned int rows, unsigned int columns)

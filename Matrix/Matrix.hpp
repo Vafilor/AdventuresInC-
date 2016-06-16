@@ -57,7 +57,7 @@ class Matrix
 		Matrix operator+(const Matrix& that) const throw(invalid_argument);
         inline Matrix operator-(const Matrix& that) const;
 		Matrix operator*(const Matrix& that) const throw(invalid_argument);
-		Matrix& operator=(const Matrix& that);
+		Matrix operator=(const Matrix& that);
 
 		const Matrix& operator*=(double scalar);
 		inline const Matrix& operator/=(double scalar);
@@ -79,7 +79,7 @@ class Matrix
 		 *passed in function where the argument to the function is the matrix entry 
 		*/
 		void applyFunctionInto(double (*function)(double entry) );
-		//TODO add new applyFunction version - one that changes entries inline, the other that creates a new object.
+		Matrix applyFunction( double (*function)(double entry) );
 };
 
 //Inline functions
