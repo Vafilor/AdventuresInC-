@@ -26,7 +26,7 @@ class NeuralNetwork
 			At least, it will be eventually, for now its just a random double in range [0,1]
 		*/
 		static Matrix gaussianDistribution(unsigned int rows, unsigned int columns);
-		static Matrix costDerivative(const Matrix& outputActiviations, const Matrix& output);
+		static Matrix costDerivative(const Matrix& outputActivations, const Matrix& output);
 		static unsigned int getLargestRow(const Matrix& matrix);
 
 	public:

@@ -74,6 +74,13 @@ int NeuralNetwork::evaluate(const vector< pair<const Matrix&, const Matrix& > >&
 	{
 		result = this->feedForward( testData[i].first() );
 		
+		testResults.push_back( getLargestRow(result) );
+	}
+
+	int totalCorrect = 0;
+
+	for(int i = 0; i < testData.size(); i++)
+	{
 		
 	}
 
@@ -129,7 +136,7 @@ Matrix NeuralNetwork::gaussianDistribution(unsigned rows, unsigned columns)
 	return matrix;
 }
 
-Matrix NeuralNetwork::costDerivative(const Matrix& outputActiviations, const Matrix& output)
+Matrix NeuralNetwork::costDerivative(const Matrix& outputActivations, const Matrix& output)
 {
 	return outputActivations - output;
 }
