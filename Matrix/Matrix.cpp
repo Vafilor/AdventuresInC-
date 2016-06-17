@@ -126,7 +126,7 @@ Matrix Matrix::operator*(const Matrix& that) const throw(invalid_argument)
     return product;
 }
 
-Matrix Matrix::operator=(const Matrix& that) 
+Matrix& Matrix::operator=(const Matrix& that) 
 {
 	this->rows = that.rows;
 	this->columns = that.columns;
@@ -144,6 +144,8 @@ Matrix Matrix::operator=(const Matrix& that)
 			this->entries[i][j] = that.entries[i][j];	
 		}
 	}
+	
+	return *this;
 }
 
 void Matrix::applyFunctionInto(double (*function)(double entry) )
@@ -225,6 +227,8 @@ const Matrix& Matrix::operator*=(double scalar)
 			this->entries[i][j] *= scalar;
 		}
 	}
+	
+	return *this;
 }
 
 const Matrix& Matrix::operator+=(const Matrix& that) throw(invalid_argument)
@@ -241,6 +245,8 @@ const Matrix& Matrix::operator+=(const Matrix& that) throw(invalid_argument)
 			this->entries[i][j] += that.entries[i][j];
 		}
 	}
+	
+	return *this;
 }
 
 Matrix Matrix::createUninitializedMatrix(unsigned int rows, unsigned int columns)

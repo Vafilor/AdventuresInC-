@@ -57,7 +57,7 @@ class Matrix
 		Matrix operator+(const Matrix& that) const throw(invalid_argument);
         inline Matrix operator-(const Matrix& that) const;
 		Matrix operator*(const Matrix& that) const throw(invalid_argument);
-		Matrix operator=(const Matrix& that);
+		Matrix& operator=(const Matrix& that);
 
 		const Matrix& operator*=(double scalar);
 		inline const Matrix& operator/=(double scalar);
