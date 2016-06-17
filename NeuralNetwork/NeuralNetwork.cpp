@@ -45,23 +45,6 @@ Matrix NeuralNetwork::feedForward(const Matrix& input)
 	}
 
     return result;
-
-
-
-	//TODO problem area
-	//for(int i = 0; i < this->biases.size(); i++)
-	//{
-	//	cout << "Input:\n" << input->toString() << endl;
-	//	cout << "Weights:\n" << this->weights[i]->toString() << endl;
-	//	input = (*this->weights[i]) * (*input);
-
-	//}
-
-//	return input;
-
-        //for b, w in zip(self.biases, self.weights):
-        //    a = sigmoid(np.dot(w, a)+b)
-        //return a
 }
 
 int NeuralNetwork::evaluate(const vector< pair<const Matrix&, const Matrix& > >& testData)

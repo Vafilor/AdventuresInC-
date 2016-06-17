@@ -42,10 +42,13 @@ class NeuralNetwork
 		*/
 		Matrix feedForward(const Matrix& input);
 		int evaluate(const vector< pair<const Matrix&, const Matrix&> >& testData);
+		
+		//pair< vector<const Matrix& >, vector<const Matrix& > > backprop(const Matrix& input, const Matrix& output);
+	
 
 //    public void SGD(List<Pair<Matrix, Matrix>> trainingData, int epochs, int miniBatchSize, double eta, List<Pair<Matrix,Matrix>> testData)
 //     public void updateMiniBatch(List<Pair<Matrix,Matrix>> miniBatch, double eta)
-//    public Pair<ArrayList<Matrix>, ArrayList<Matrix>> backprop(Matrix input, Matrix output)
+		
 
 		
 };
