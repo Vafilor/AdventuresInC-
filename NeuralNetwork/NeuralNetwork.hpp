@@ -28,6 +28,7 @@ class NeuralNetwork
 		static Matrix gaussianDistribution(unsigned int rows, unsigned int columns);
 		static Matrix costDerivative(const Matrix& outputActivations, const Matrix& output);
 		static unsigned int getLargestRow(const Matrix& matrix);
+		static int getNonZeroRow(const Matrix& matrix);
 
 	public:
 		NeuralNetwork(const vector<int>& layerSizes);

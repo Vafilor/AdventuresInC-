@@ -72,7 +72,7 @@ int NeuralNetwork::evaluate(const vector< pair<const Matrix&, const Matrix& > >&
 	
 	for(int i = 0; i < testData.size(); i++)
 	{
-		result = this->feedForward( testData[i].first() );
+		result = this->feedForward( testData[i].first );
 		
 		testResults.push_back( getLargestRow(result) );
 	}
@@ -81,31 +81,13 @@ int NeuralNetwork::evaluate(const vector< pair<const Matrix&, const Matrix& > >&
 
 	for(int i = 0; i < testData.size(); i++)
 	{
-		
+		if( testResults[i] == getNonZeroRow( testData[i].second ) ) 
+		{
+			totalCorrect++;
+		}
 	}
-
-// 
-//         Matrix result = null;
-// 
-//         for(int i = 0; i < testData.size(); i++)
-//         {
-//             result = this.feedforward(testData.get(i).getFirstElement());
-// 
-//             testResults.add(this.getLargestRow(result));
-//         }
-// 
-//         int totalCorrect = 0;
-// 
-// 		//TODO make this a separate method
-//         for(int i = 0; i < testData.size(); i++)
-//         {
-//             if( testResults.get(i) == this.getNonZeroRow(testData.get(i).getSecondElement()) )
-//             {
-//                 totalCorrect++;
-//             }
-//         }
-// 
-//         return totalCorrect;
+	
+	return totalCorrect;
 }
 
 double sigmoid(double value)
@@ -158,3 +140,17 @@ unsigned int NeuralNetwork::getLargestRow(const Matrix& matrix)
 	
 	return largest;
 }
+
+int NeuralNetwork::getNonZeroRow(const Matrix& matrix)
+{
+	for(int i = matrix.getRows() - 1; i >= 0; i--)
+	{
+		if( matrix(i, 0) > 0.0 )
+        {
+                return i;
+		}
+    }
+
+    return -1;
+}
+
