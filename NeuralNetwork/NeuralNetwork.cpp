@@ -47,31 +47,84 @@ Matrix NeuralNetwork::feedForward(const Matrix& input)
     return result;
 }
 
-int NeuralNetwork::evaluate(const vector< pair<const Matrix&, const Matrix& > >& testData)
+int NeuralNetwork::evaluate(const NeuralTrainingData& data)
 {
 //TODO ensure that the correct length is initially reserved
-	vector<int> testResults( testData.size() );
-	Matrix result;
-	
-	for(int i = 0; i < testData.size(); i++)
-	{
-		result = this->feedForward( testData[i].first );
-		
-		testResults.push_back( getLargestRow(result) );
-	}
 
-	int totalCorrect = 0;
+	//TODO - can be for each loop - order doesn't matter either.
 
-	for(int i = 0; i < testData.size(); i++)
-	{
-		if( testResults[i] == getNonZeroRow( testData[i].second ) ) 
-		{
-			totalCorrect++;
-		}
-	}
-	
-	return totalCorrect;
+//	Matrix result;
+
+//	for(int i = 0; i < data.size(); i++)
+//	{
+//		result = this->feedForward( data[i].input );
+//		
+//		if( getLargestRow(result) == getNonZeroRow() )	
+//	}
+
+//	vector<int> testResults( data.size() );
+//	Matrix result;
+//	
+//	for(int i = 0; i < data.size(); i++)
+//	{
+//		result = this->feedForward( data[i].first );
+//		
+//		testResults.push_back( getLargestRow(result) );
+//	}
+
+//	int totalCorrect = 0;
+
+//	for(int i = 0; i < testData.size(); i++)
+//	{
+//		if( testResults[i] == getNonZeroRow( testData[i].second ) ) 
+//		{
+//			totalCorrect++;
+//		}
+//	}
+//	
+//	return totalCorrect;
+return 0;
 }
+
+//pair<vector<Matrix>, vector<Matrix>> NeuralNetwork::backprop(const Matrix& input, const Matrix& output)
+//{
+	
+	
+//        ArrayList<Matrix> nabla_b = this.createBlankCopy(this.biases);
+//		ArrayList<Matrix> nabla_w = this.createBlankCopy(this.weights);
+//		
+//		Pair<ArrayList<Matrix>, ArrayList<Matrix>> zsAndActivations = this.calculateActivations(input);
+
+//		ArrayList<Matrix> zs = zsAndActivations.getFirstElement();
+//		ArrayList<Matrix> activations = zsAndActivations.getSecondElement();
+//        
+
+//        //Backward pass
+//        Matrix delta = this.costDerivative(activations.get(activations.size() - 1), output).
+//                            multiplyEntries(
+//                                    zs.get(zs.size()-1).
+//                                    applyFunction(NeuralNetwork::sigmoidPrime)
+//                            );
+
+
+//        nabla_b.set(nabla_b.size()-1, delta);
+//        nabla_w.set(nabla_w.size()-1,  delta.multiply(activations.get(activations.size() - 2).transpose()) );
+
+//        Matrix z = null;
+//        Matrix sp = null;
+
+//        for(int i = 2; i < this.sizes.length; i++)
+//        {
+//            z = zs.get(zs.size() - i);
+//            sp = z.applyFunction(NeuralNetwork::sigmoidPrime);
+
+//            delta = this.weights.get(this.weights.size() - i + 1).transpose().multiply(delta).multiplyEntries(sp);
+//            nabla_b.set(nabla_b.size() - i, delta);
+//            nabla_w.set(nabla_w.size() - i, delta.multiply(activations.get(activations.size() - i - 1).transpose()) );
+//        }
+
+//		return new Pair<ArrayList<Matrix>, ArrayList<Matrix>>( nabla_b, nabla_w );
+//}
 
 double sigmoid(double value)
 {
@@ -106,29 +159,64 @@ Matrix NeuralNetwork::costDerivative(const Matrix& outputActivations, const Matr
 	return outputActivations - output;
 }
 
-unsigned int NeuralNetwork::getLargestRow(const Matrix& matrix)
+void NeuralNetwork::createBlankCopy(vector<Matrix>& matrices, const vector<Matrix> original)
+{
+	for(int i = 0; i < original.size(); i++)
+	{
+		matrices.push_back(Matrix( original[i].getRows(), original[i].getColumns() ));
+	}
+}
+
+
+
+NeuralTrainingData::NeuralTrainingData(const vector<Matrix>& inputs, const vector<Matrix>& outputs)
+{
+	//TODO make sure this is being copied correctly
+	this->inputs = inputs;
+	this->outputs = outputs;
+
+	for(int i = 0; i < this->inputs.size(); i++)
+	{
+		this->wrappedData.push_back(Datum(inputs[i], outputs[i]));
+	}
+}
+
+unsigned int NeuralTrainingData::MatrixWrapper::largestRow() const
 {
 	unsigned int largest = 0;
 	
-	double largestValue = matrix(largest, 0);
+	double largestValue = this->matrix(largest, 0);
 	
-	for(int i = 0; i < matrix.getRows(); i++)
+	for(int i = 0; i < this->matrix.getRows(); i++)
 	{
-		if( matrix(i, 0) > largestValue ) 
+		if( this->matrix(i, 0) > largestValue ) 
 		{
 			largest = i;
-			largestValue = matrix(i, 0);
+			largestValue = this->matrix(i, 0);
 		}
 	}
 	
 	return largest;
 }
 
-int NeuralNetwork::getNonZeroRow(const Matrix& matrix)
+int NeuralTrainingData::MatrixWrapper::firstNonZeroRow() const
 {
-	for(int i = matrix.getRows() - 1; i >= 0; i--)
+	for(int i = 0; i < this->matrix.getRows(); i++)
+	{		
+		if( this->matrix(i,0) > 0.0)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+int NeuralTrainingData::MatrixWrapper::lastNonZeroRow() const
+{
+	for(int i = this->matrix.getRows() - 1; i >= 0; i--)
 	{
-		if( matrix(i, 0) > 0.0 )
+		if( this->matrix(i, 0) > 0.0 )
         {
                 return i;
 		}
