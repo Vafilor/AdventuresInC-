@@ -49,41 +49,20 @@ Matrix NeuralNetwork::feedForward(const Matrix& input)
 
 int NeuralNetwork::evaluate(const NeuralTrainingData& data)
 {
-//TODO ensure that the correct length is initially reserved
-
+	unsigned int totalCorrect = 0;
+	Matrix result;
 	//TODO - can be for each loop - order doesn't matter either.
+	for(int i = 0; i < data.size(); i++)
+	{
+		result = this->feedForward( data[i].input );
+		
+		if( NeuralNetwork::getLargestRow(result) == NeuralNetwork::getLastNonZeroRow(data[i].output) )
+		{
+			totalCorrect++;
+		}	
+	}
 
-//	Matrix result;
-
-//	for(int i = 0; i < data.size(); i++)
-//	{
-//		result = this->feedForward( data[i].input );
-//		
-//		if( getLargestRow(result) == getNonZeroRow() )	
-//	}
-
-//	vector<int> testResults( data.size() );
-//	Matrix result;
-//	
-//	for(int i = 0; i < data.size(); i++)
-//	{
-//		result = this->feedForward( data[i].first );
-//		
-//		testResults.push_back( getLargestRow(result) );
-//	}
-
-//	int totalCorrect = 0;
-
-//	for(int i = 0; i < testData.size(); i++)
-//	{
-//		if( testResults[i] == getNonZeroRow( testData[i].second ) ) 
-//		{
-//			totalCorrect++;
-//		}
-//	}
-//	
-//	return totalCorrect;
-return 0;
+	return totalCorrect;
 }
 
 //pair<vector<Matrix>, vector<Matrix>> NeuralNetwork::backprop(const Matrix& input, const Matrix& output)
@@ -181,47 +160,35 @@ NeuralTrainingData::NeuralTrainingData(const vector<Matrix>& inputs, const vecto
 	}
 }
 
-unsigned int NeuralTrainingData::MatrixWrapper::largestRow() const
+
+unsigned int NeuralNetwork::getLargestRow(const Matrix& matrix)
 {
 	unsigned int largest = 0;
 	
-	double largestValue = this->matrix(largest, 0);
+	double largestValue = matrix(largest, 0);
 	
-	for(int i = 0; i < this->matrix.getRows(); i++)
+	for(int i = 0; i < matrix.getRows(); i++)
 	{
-		if( this->matrix(i, 0) > largestValue ) 
+		if( matrix(i, 0) > largestValue ) 
 		{
 			largest = i;
-			largestValue = this->matrix(i, 0);
+			largestValue = matrix(i, 0);
 		}
 	}
 	
 	return largest;
 }
 
-int NeuralTrainingData::MatrixWrapper::firstNonZeroRow() const
-{
-	for(int i = 0; i < this->matrix.getRows(); i++)
-	{		
-		if( this->matrix(i,0) > 0.0)
-		{
-			return i;
-		}
-	}
 
-	return -1;
-}
-
-int NeuralTrainingData::MatrixWrapper::lastNonZeroRow() const
+int NeuralNetwork::getLastNonZeroRow(const Matrix& matrix)
 {
-	for(int i = this->matrix.getRows() - 1; i >= 0; i--)
+	for(int i = matrix.getRows() - 1; i >= 0; i--)
 	{
-		if( this->matrix(i, 0) > 0.0 )
+		if( matrix(i, 0) > 0.0 )
         {
-                return i;
+			return i;
 		}
     }
 
     return -1;
 }
-

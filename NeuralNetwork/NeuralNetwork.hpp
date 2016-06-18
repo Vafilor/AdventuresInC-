@@ -34,6 +34,9 @@ class NeuralNetwork
 		 * Modifies incoming matrices container to have 0 filled matrices, where each matrix has the same size as a matrix in orignal, done in order. 
 		*/
 		static void createBlankCopy(vector<Matrix>& matrices, const vector<Matrix> original);
+		static unsigned int getLargestRow(const Matrix& matrix);
+		static int getLastNonZeroRow(const Matrix& matrix);
+
 
 	public:
 		NeuralNetwork(const vector<int>& layerSizes);
@@ -68,26 +71,10 @@ double sigmoidPrime(double value);
 class NeuralTrainingData
 {
 	private:
-		class MatrixWrapper 
-		{	
-			private:
-				const Matrix& matrix;
-
-			public:
-				MatrixWrapper(const Matrix& newMatrix) : matrix(newMatrix)
-				{
-				}
-
-				const Matrix& rawMatrix() const { return this->matrix; };
-				unsigned int largestRow() const;
-				int firstNonZeroRow() const;
-				int lastNonZeroRow() const;
-		};
-
 		struct Datum
 		{
-			MatrixWrapper input;
-			MatrixWrapper output;
+			const Matrix& input;
+			const Matrix& output;
 
 			Datum(const Matrix& inputData, const Matrix& outputData) : input(inputData), output(outputData)
 			{
@@ -105,7 +92,7 @@ class NeuralTrainingData
 		const Datum& operator[](int i) const { return this->wrappedData[i]; };
 		const vector<Matrix>& getInputs() const { return this->inputs; };
 		const vector<Matrix>& getOutputs() const { return this->outputs; };	
-		vector<Matrix>::size_type size() { return this->inputs.size(); };
+		vector<Matrix>::size_type size() const { return this->inputs.size(); };
 };
 
 #endif
