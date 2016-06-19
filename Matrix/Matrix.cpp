@@ -128,10 +128,10 @@ Matrix Matrix::operator*(const Matrix& that) const throw(invalid_argument)
 
 Matrix& Matrix::operator=(const Matrix& that) 
 {
+	this->freeEntriesMemory();
+
 	this->rows = that.rows;
 	this->columns = that.columns;
-
-	this->freeEntriesMemory();
 
 	this->entries = new double*[this->rows];
 	
