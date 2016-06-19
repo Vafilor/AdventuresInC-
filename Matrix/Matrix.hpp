@@ -64,6 +64,12 @@ class Matrix
 		const Matrix& operator+=(const Matrix& that) throw(invalid_argument);
 		inline const Matrix& operator-=(const Matrix& that) throw(invalid_argument);
 
+		/**
+		 * Multiplies each entry of this matrix by each entry of that matrix, entry by entry.
+		 * Result(i,j) = this(i,j) * that(i,j)
+		 */
+		Matrix multiplyEntries(const Matrix& that) const throw(invalid_argument);
+
 		//Friend Functions
 
 		friend Matrix operator*(const Matrix& that, double scalar);

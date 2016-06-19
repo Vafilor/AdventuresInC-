@@ -281,3 +281,23 @@ Matrix Matrix::transpose()
 	return transpose;
 }
 
+Matrix Matrix::multiplyEntries(const Matrix& that) const throw(invalid_argument)
+{
+	if(this->rows != that.rows || this->columns != that.columns)
+	{
+		throw invalid_argument("multiplyEntry - matrices of incompatible size");
+	}
+
+	Matrix result(*this);
+
+	for(int i = 0; i < this->rows; i++)
+	{
+		for(int j = 0; j < this->columns; j++)
+		{
+			this->entries[i][j] *= that.entries[i][j];
+		}
+	}
+
+	return result;
+}
+
