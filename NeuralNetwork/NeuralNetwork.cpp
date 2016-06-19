@@ -66,6 +66,27 @@ int NeuralNetwork::evaluate(const NeuralTrainingData& data)
 	return totalCorrect;
 }
 
+void NeuralNetwork::SGD(const NeuralTrainingData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralTrainingData& testData )		
+{
+	vector<pair<int,int>> trainingDataPartition;
+    partition(0, trainingData.size(), miniBatchSize, trainingDataPartition);
+
+	for(int i = 1; i <= epochs; i++)
+	{
+		//TODO shuffle partition
+		//TODO for each loop
+		for(int j = 0; j < trainingDataPartition.size(); j++)
+		{
+			this->updateMiniBatch(trainingData, trainingDataPartition[i], eta);
+		}
+	
+		if(testData.size() > 0)
+		{
+			cout << "Epoch " << i << "/" << epochs << ": " << this->evaluate(testData) << "/" << testData.size() << " correct." << endl;
+		}
+	}
+}
+
 void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<Matrix>& outputWeights, vector<Matrix>& outputBiases)
 {
 	createBlankCopy(outputWeights, this->weights);
@@ -91,6 +112,23 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 		delta = (this->weights[this->weights.size() - i + 1].transpose() * delta).multiplyEntries(sp);
 		outputBiases[outputBiases.size() - i] = delta;
 		outputWeights[outputWeights.size() - i] = delta * ( activations[activations.size() - i - 1].transpose() ); 
+	}
+}
+
+void NeuralNetwork::partition(int start, int end, int size, vector<pair<int,int>>& pairs)
+{
+	int endOfRange = 0;
+	
+	for(int i = start; i < end; i += size)
+	{
+		endOfRange = i + size;
+		
+		if(endOfRange > end)
+		{
+			endOfRange = end;
+		}
+
+		pairs.push_back( pair<int,int>(i, endOfRange) );
 	}
 }
 
