@@ -5,7 +5,7 @@
 #include <vector>
 #include <utility>
 #include "Matrix.hpp" 
-
+#include <stdexcept>
 
 #ifndef NEURAL_NETWORK_H
 #define NEURAL_NETWORK_H
@@ -14,16 +14,20 @@
 using std::vector;
 using std::pair;
 
+typedef vector<int>::size_type v_int;
+typedef vector<Matrix>::size_type m_int;
+
 class NeuralTrainingData;
 
 class NeuralNetwork
 {
+	//TODO pair<v_int,v_int> is [a,b)
 	private:
 		vector<int> sizes;
 		vector<Matrix> biases;
 		vector<Matrix> weights;
 
-		/*
+		/*	Matrix z;
 			Creates a rows x columns matrix where each entry is initialized randomly via a Gaussian distribution with mean 0 and variance 1. 
 			At least, it will be eventually, for now its just a random double in range [0,1]
 		*/
@@ -37,7 +41,14 @@ class NeuralNetwork
 		static unsigned int getLargestRow(const Matrix& matrix);
 		static int getLastNonZeroRow(const Matrix& matrix);
 
-
+		//outputWeights and biases are expected to be empty.
+		void backprop(const Matrix& input, const Matrix& output, vector<Matrix>& outputWeights, vector<Matrix>& outputBiases);
+		void updateMiniBatch(const NeuralTrainingData& trainingData, pair<v_int, v_int> limits, double eta); 
+		static void addInto(vector<Matrix>& matrices, const vector<Matrix>& delta) throw(invalid_argument);
+	
+		//zs and activations are expected to be empty.
+		void calculateZsAndActivations(const Matrix& input, vector<Matrix>& zs, vector<Matrix>& activations);
+		
 	public:
 		NeuralNetwork(const vector<int>& layerSizes);
 		~NeuralNetwork();
@@ -51,14 +62,9 @@ class NeuralNetwork
 		Matrix feedForward(const Matrix& input);
 		int evaluate(const NeuralTrainingData& data);
 		
-//		pair<vector<const Matrix&>, vector<const Matrix&>> backprop(const Matrix& input, const Matrix& output);
-	
 
-//    public void SGD(List<Pair<Matrix, Matrix>> trainingData, int epochs, int miniBatchSize, double eta, List<Pair<Matrix,Matrix>> testData)
-//     public void updateMiniBatch(List<Pair<Matrix,Matrix>> miniBatch, double eta)
-		
-
-		
+//		void SGD(const NeuralTrainingData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta);
+//		void SGD(const NeuralTrainingData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralTrainingData& testData );		
 };
 
 double sigmoid(double value);
@@ -68,6 +74,7 @@ double sigmoidPrime(double value);
  * Utility class to help interact with Neural Network Training Data.
  *
 */
+//TODO rename to NeuralNetworkData - as it can be both test or training data.
 class NeuralTrainingData
 {
 	private:

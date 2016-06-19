@@ -1,5 +1,6 @@
 #include "NeuralNetwork.hpp"
 #include "Matrix.hpp"
+#include <stdexcept>
 #include <cstdlib>
 #include <iostream> //For debugging
 #include <cmath>
@@ -65,45 +66,33 @@ int NeuralNetwork::evaluate(const NeuralTrainingData& data)
 	return totalCorrect;
 }
 
-//pair<vector<Matrix>, vector<Matrix>> NeuralNetwork::backprop(const Matrix& input, const Matrix& output)
-//{
+void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<Matrix>& outputWeights, vector<Matrix>& outputBiases)
+{
+	createBlankCopy(outputWeights, this->weights);
+	createBlankCopy(outputBiases, this->biases);
 	
+	vector<Matrix> zs;
+	vector<Matrix> activations;
+
+	calculateZsAndActivations(input, zs, activations);
 	
-//        ArrayList<Matrix> nabla_b = this.createBlankCopy(this.biases);
-//		ArrayList<Matrix> nabla_w = this.createBlankCopy(this.weights);
-//		
-//		Pair<ArrayList<Matrix>, ArrayList<Matrix>> zsAndActivations = this.calculateActivations(input);
+	//Backward pass
+	Matrix delta = costDerivative( activations.back(), output ) * (zs.back().applyFunction(sigmoidPrime));
 
-//		ArrayList<Matrix> zs = zsAndActivations.getFirstElement();
-//		ArrayList<Matrix> activations = zsAndActivations.getSecondElement();
-//        
+	outputBiases.back() = delta;
+	outputWeights.back() = delta * ( activations[ activations.size() - 2 ].transpose() );
 
-//        //Backward pass
-//        Matrix delta = this.costDerivative(activations.get(activations.size() - 1), output).
-//                            multiplyEntries(
-//                                    zs.get(zs.size()-1).
-//                                    applyFunction(NeuralNetwork::sigmoidPrime)
-//                            );
+	Matrix sp;
 
-
-//        nabla_b.set(nabla_b.size()-1, delta);
-//        nabla_w.set(nabla_w.size()-1,  delta.multiply(activations.get(activations.size() - 2).transpose()) );
-
-//        Matrix z = null;
-//        Matrix sp = null;
-
-//        for(int i = 2; i < this.sizes.length; i++)
-//        {
-//            z = zs.get(zs.size() - i);
-//            sp = z.applyFunction(NeuralNetwork::sigmoidPrime);
-
-//            delta = this.weights.get(this.weights.size() - i + 1).transpose().multiply(delta).multiplyEntries(sp);
-//            nabla_b.set(nabla_b.size() - i, delta);
-//            nabla_w.set(nabla_w.size() - i, delta.multiply(activations.get(activations.size() - i - 1).transpose()) );
-//        }
-
-//		return new Pair<ArrayList<Matrix>, ArrayList<Matrix>>( nabla_b, nabla_w );
-//}
+	for(v_int i = 2; i < this->sizes.size(); i++)
+	{
+		sp = (zs[zs.size() - i]).applyFunction(sigmoidPrime);
+		
+		delta = (this->weights[this->weights.size() - i + 1].transpose() * delta).multiplyEntries(sp);
+		outputBiases[outputBiases.size() - i] = delta;
+		outputWeights[outputWeights.size() - i] = delta * ( activations[activations.size() - i - 1].transpose() ); 
+	}
+}
 
 double sigmoid(double value)
 {
@@ -138,6 +127,52 @@ Matrix NeuralNetwork::costDerivative(const Matrix& outputActivations, const Matr
 	return outputActivations - output;
 }
 
+void NeuralNetwork::addInto(vector<Matrix>& matrices, const vector<Matrix>& delta) throw(invalid_argument)
+{
+	if(matrices.size() != delta.size())
+	{
+		throw invalid_argument("AddInto - different size of matrix lists");
+	}
+
+	for(vector<Matrix>::size_type i = 0; i < matrices.size(); i++)
+	{
+		matrices[i] += delta[i];
+	}
+}
+
+void NeuralNetwork::updateMiniBatch(const NeuralTrainingData& trainingData, pair<v_int, v_int> limits, double eta)
+{
+	vector<Matrix> nabla_b;
+	vector<Matrix> delta_nabla_b;
+	vector<Matrix> nabla_w;
+	vector<Matrix> delta_nabla_w;
+
+	createBlankCopy(nabla_b, this->biases);
+	createBlankCopy(nabla_w, this->weights);
+
+
+	for(v_int i = limits.first; i < limits.second; i++)
+	{
+		this->backprop(trainingData[i].input, trainingData[i].output, delta_nabla_w, delta_nabla_b);
+		
+		addInto(nabla_b, delta_nabla_b);
+		addInto(nabla_w, delta_nabla_w);
+	}
+
+	v_int limitRange = limits.second - limits.first;
+	double learningScale = eta / limitRange;
+
+	for( m_int i = 0; i < this->weights.size(); i++) 
+	{
+		this->weights[i] -= nabla_w[i] * learningScale;
+	}
+
+	for( m_int i = 0; i < this->biases.size(); i++)
+	{
+		this->biases[i] -= nabla_b[i] * learningScale;
+	}
+}
+
 void NeuralNetwork::createBlankCopy(vector<Matrix>& matrices, const vector<Matrix> original)
 {
 	for(int i = 0; i < original.size(); i++)
@@ -146,7 +181,22 @@ void NeuralNetwork::createBlankCopy(vector<Matrix>& matrices, const vector<Matri
 	}
 }
 
+void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix>& zs, vector<Matrix>& activations)
+{
+	Matrix z;
+	Matrix activation = input;
 
+	activations.push_back(activation);
+
+	for(m_int i = 0; i < this->biases.size(); i++)
+	{
+		z = (this->weights[i] * activation) + this->biases[i];
+		zs.push_back(z);
+
+		activation = z.applyFunction(sigmoid);
+		activations.push_back(activation);	
+	}
+}
 
 NeuralTrainingData::NeuralTrainingData(const vector<Matrix>& inputs, const vector<Matrix>& outputs)
 {
