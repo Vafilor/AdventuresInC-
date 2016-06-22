@@ -68,7 +68,7 @@ int NeuralNetwork::evaluate(const NeuralTrainingData& data)
 
 void NeuralNetwork::SGD(const NeuralTrainingData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralTrainingData& testData )		
 {
-	vector<pair<int,int>> trainingDataPartition;
+	vector <pair<int,int> > trainingDataPartition;
     partition(0, trainingData.size(), miniBatchSize, trainingDataPartition);
 
 	for(int i = 1; i <= epochs; i++)
@@ -115,7 +115,7 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 	}
 }
 
-void NeuralNetwork::partition(int start, int end, int size, vector<pair<int,int>>& pairs)
+void NeuralNetwork::partition(int start, int end, int size, vector <pair<int,int> >& pairs)
 {
 	int endOfRange = 0;
 	
@@ -246,6 +246,14 @@ NeuralTrainingData::NeuralTrainingData(const vector<Matrix>& inputs, const vecto
 	{
 		this->wrappedData.push_back(Datum(inputs[i], outputs[i]));
 	}
+}
+
+NeuralTrainingData::NeuralTrainingData()
+{	
+}
+
+NeuralTrainingData::~NeuralTrainingData()
+{	
 }
 
 

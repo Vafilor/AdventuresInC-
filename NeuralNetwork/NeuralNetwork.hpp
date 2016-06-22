@@ -78,7 +78,7 @@ class NeuralNetwork
 		 * If size is greater than the incoming range, a pair that spans the whole range is returned as the single element of the collection.
 		 * If the range can't be split up evenly, the last span will be shorter than all the other spans.
 		*/
-		static void partition(int start, int end, int size, vector<pair<int,int>>& pairs);
+		static void partition(int start, int end, int size, vector< pair<int,int> >& pairs);
 
 		//outputWeights and biases are expected to be empty.
 		void backprop(const Matrix& input, const Matrix& output, vector<Matrix>& outputWeights, vector<Matrix>& outputBiases);
