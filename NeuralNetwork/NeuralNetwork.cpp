@@ -237,19 +237,24 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 }
 
 NeuralTrainingData::NeuralTrainingData(const vector<Matrix>& inputs, const vector<Matrix>& outputs)
-{
-	//TODO make sure this is being copied correctly
+{		
+	//TODO make sure this is being created correctly
+	
+	cout << "Neural Training Data" << endl;
 	this->inputs = inputs;
+	
+	cout << "Finished Loading Inputs" << endl;
+	
 	this->outputs = outputs;
-
+	
+	cout << "Finished Loading Outputs" << endl;
+	
 	for(int i = 0; i < this->inputs.size(); i++)
 	{
 		this->wrappedData.push_back(Datum(inputs[i], outputs[i]));
 	}
-}
-
-NeuralTrainingData::NeuralTrainingData()
-{	
+	
+	cout << "Finished Wrapping Data" << endl;
 }
 
 NeuralTrainingData::~NeuralTrainingData()
