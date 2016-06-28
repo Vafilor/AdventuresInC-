@@ -6,6 +6,7 @@
 #include "Matrix.hpp"
 #include "NeuralNetwork.hpp"
 #include <stdexcept>
+#include "Timer.hpp"
 
 using namespace std;
 
@@ -28,10 +29,35 @@ int main()
 	
 	vector<Matrix> labelData;
 	vector<Matrix> imageData;
+	
+	Timer timer;
+	
+	timer.mark("Load Data");
 		
 	loadData(labelData, imageData, imageTrainingPath, labelTrainingPath);
 	
+	timer.mark();
+	
+	timer.mark("Convert to NeuralTrainingData");
+	
+	vector<Matrix> labelTrainingData(labelData.begin(), labelData.end() - 10000);
+	vector<Matrix> imageTrainingData(imageData.begin(), imageData.end() - 10000);
+	
+	vector<Matrix> labelTestData(labelData.begin() + 50000, labelData.end());
+	vector<Matrix> imageTestData(imageData.begin() + 50000, imageData.end());
+	
+	cout << "Label Training Data:" << labelTrainingData.size() << endl;
+	cout << "Image Training Data:" << imageTrainingData.size() << endl;
+	
+	cout << "Label Test Data:" << labelTestData.size() << endl;
+	cout << "Image Test Data:" << imageTestData.size() << endl;
+	
 	NeuralTrainingData trainingData(imageData, labelData);
+	NeuralTrainingData testData(imageTestData, labelTestData);
+	
+	timer.mark();
+	
+	cout << timer << endl;
 	
 	return 0;
 }
