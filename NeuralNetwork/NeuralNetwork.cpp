@@ -48,7 +48,7 @@ Matrix NeuralNetwork::feedForward(const Matrix& input)
     return result;
 }
 
-int NeuralNetwork::evaluate(const NeuralTrainingData& data)
+int NeuralNetwork::evaluate(const NeuralNetworkData& data)
 {
 	unsigned int totalCorrect = 0;
 	Matrix result;
@@ -66,7 +66,7 @@ int NeuralNetwork::evaluate(const NeuralTrainingData& data)
 	return totalCorrect;
 }
 
-void NeuralNetwork::SGD(const NeuralTrainingData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralTrainingData& testData )		
+void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData )		
 {
 	vector <pair<int,int> > trainingDataPartition;
     partition(0, trainingData.size(), miniBatchSize, trainingDataPartition);
@@ -178,7 +178,7 @@ void NeuralNetwork::addInto(vector<Matrix>& matrices, const vector<Matrix>& delt
 	}
 }
 
-void NeuralNetwork::updateMiniBatch(const NeuralTrainingData& trainingData, pair<v_int, v_int> limits, double eta)
+void NeuralNetwork::updateMiniBatch(const NeuralNetworkData& trainingData, pair<v_int, v_int> limits, double eta)
 {
 	vector<Matrix> nabla_b;
 	vector<Matrix> delta_nabla_b;
@@ -239,30 +239,21 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 	}
 }
 
-NeuralTrainingData::NeuralTrainingData(const vector<Matrix>& inputs, const vector<Matrix>& outputs)
-{		
-	//TODO make sure this is being created correctly
-	
-	cout << "Neural Training Data" << endl;
-	this->inputs = inputs;
-	
-	cout << "Finished Loading Inputs" << endl;
-	
-	this->outputs = outputs;
-	
-	cout << "Finished Loading Outputs" << endl;
-	
+NeuralNetworkData::wrapData()
+{			
+	if(this->wrappedData.size() != 0)
+	{
+		throw logic_error("Can't wrapData more than once");
+	}
+
 	for(int i = 0; i < this->inputs.size(); i++)
 	{
-		this->wrappedData.push_back(Datum(inputs[i], outputs[i]));
+		this->wrappedData.push_back(Datum(this->inputs[i], this->outputs[i]));
 	}
 	
 	cout << "Finished Wrapping Data" << endl;
 }
 
-NeuralTrainingData::~NeuralTrainingData()
-{	
-}
 
 
 unsigned int NeuralNetwork::getLargestRow(const Matrix& matrix)
