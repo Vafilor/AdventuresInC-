@@ -45,7 +45,8 @@ class NeuralNetworkData
 		vector<Matrix> outputs;
 		
 		//Populates the vector<Datum>, providing convient access to NeuralNetwork 
-		void wrapData();
+		//TODO make this abstract class
+		void wrapData() = 0;
 
 		
 	public:
