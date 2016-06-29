@@ -57,6 +57,20 @@ int main()
 	
 	timer.mark();
 	
+	vector<int> neurons;
+	neurons.push_back(28*28);
+	neurons.push_back(10);
+	neurons.push_back(10);
+	
+	NeuralNetwork network(neurons);
+	
+	
+	timer.mark("Net Training");
+	
+	network.SGD(trainingData, 10, 10, 1.0, testData );		
+
+	timer.mark();
+	
 	cout << timer << endl;
 	
 	return 0;
