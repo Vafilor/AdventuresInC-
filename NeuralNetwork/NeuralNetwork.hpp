@@ -28,12 +28,15 @@ class NeuralTrainingData
 	private:
 		struct Datum
 		{
-			const Matrix& input;
-			const Matrix& output;
+			const Matrix* input;
+			const Matrix* output;
 
-			Datum(const Matrix& inputData, const Matrix& outputData) : input(inputData), output(outputData)
+			Datum(const Matrix& inputData, const Matrix& outputData) : input(&inputData), output(&outputData)
 			{
 			}
+			
+			const Matrix& getInput() const { return *this->input; };
+			const Matrix& getOutput() const { return *this->output; };
 		};
 
 		vector<Matrix> inputs;

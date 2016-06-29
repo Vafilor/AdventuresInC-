@@ -55,9 +55,9 @@ int NeuralNetwork::evaluate(const NeuralTrainingData& data)
 	//TODO - can be for each loop - order doesn't matter either.
 	for(int i = 0; i < data.size(); i++)
 	{
-		result = this->feedForward( data[i].input );
+		result = this->feedForward( data[i].getInput() );
 		
-		if( NeuralNetwork::getLargestRow(result) == NeuralNetwork::getLastNonZeroRow(data[i].output) )
+		if( NeuralNetwork::getLargestRow(result) == NeuralNetwork::getLastNonZeroRow(data[i].getOutput()) )
 		{
 			totalCorrect++;
 		}	
@@ -98,7 +98,7 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 	calculateZsAndActivations(input, zs, activations);
 	
 	//Backward pass
-	Matrix delta = costDerivative( activations.back(), output ) * (zs.back().applyFunction(sigmoidPrime));
+	Matrix delta = costDerivative( activations.back(), output ).multiplyEntries( zs.back().applyFunction(sigmoidPrime) );
 
 	outputBiases.back() = delta;
 	outputWeights.back() = delta * ( activations[ activations.size() - 2 ].transpose() );
@@ -191,10 +191,13 @@ void NeuralNetwork::updateMiniBatch(const NeuralTrainingData& trainingData, pair
 
 	for(v_int i = limits.first; i < limits.second; i++)
 	{
-		this->backprop(trainingData[i].input, trainingData[i].output, delta_nabla_w, delta_nabla_b);
-		
+		this->backprop(trainingData[i].getInput(), trainingData[i].getOutput(), delta_nabla_w, delta_nabla_b);
+	
 		addInto(nabla_b, delta_nabla_b);
 		addInto(nabla_w, delta_nabla_w);
+
+		delta_nabla_b.clear();
+		delta_nabla_w.clear();
 	}
 
 	v_int limitRange = limits.second - limits.first;
