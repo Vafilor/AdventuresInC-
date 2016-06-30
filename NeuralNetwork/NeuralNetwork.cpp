@@ -239,7 +239,7 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 	}
 }
 
-NeuralNetworkData::wrapData()
+void NeuralNetworkData::wrapData()
 {			
 	if(this->wrappedData.size() != 0)
 	{
