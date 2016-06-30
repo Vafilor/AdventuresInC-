@@ -8,11 +8,13 @@
 #ifndef HAND_WRITING_H
 #define HAND_WRITING_H
 
+using std::string;
+
 class HandWriting : public NeuralNetworkData
 {
 	private:
 		static unsigned char* loadFileData(string fileName);
-		static unsigned int bytesToInt(unsigned char[] bytes);
+		static unsigned int bytesToInt(unsigned char bytes[] );
 		
 		void formatAndStoreLabelData(unsigned char* data);
 		void formatAndStoreImageData(unsigned char* data);

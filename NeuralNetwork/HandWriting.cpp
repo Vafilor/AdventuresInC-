@@ -1,26 +1,51 @@
 #include "HandWriting.hpp"
-#include <ifstream>
+#include <fstream>
+#include <string>
+#include "Timer.hpp"
+#include <iostream>
 
 using namespace std;
 
 HandWriting::HandWriting(string imageDataFilePath, string labelDataFilePath)
 {
+	Timer timer;
+	
+	timer.mark("Load Raw Images");
 	unsigned char* imageData = loadFileData(imageDataFilePath);
+	timer.mark();
+	
+	timer.mark("Load Raw Labels");
 	unsigned char* labelData = loadFileData(labelDataFilePath);
+	timer.mark();
+	
+	timer.mark("Format Images");
 	
 	this->formatAndStoreImageData(imageData);
-	this->formatAndStoreLabelData(labelData);
 	
+	timer.mark();
+	
+	timer.mark("Format Labels");
+	this->formatAndStoreLabelData(labelData);
+	timer.mark();
+	
+	timer.mark("Wrap Data");
 	this->wrapData();
+	timer.mark();
+	
+	cout << timer << endl << endl;
 	
 	delete[] imageData;
 	delete[] labelData;
 }
 
+HandWriting::~HandWriting()
+{
+}
+
 unsigned char* HandWriting::loadFileData(string fileName)
 {
 	ifstream file;
-	file.open(labelsFilePath, ios::in | ios::binary | ios::ate );
+	file.open(fileName, ios::in | ios::binary | ios::ate );
 	
 	if( !file.is_open() ) 
 	{
@@ -49,17 +74,17 @@ void HandWriting::formatAndStoreImageData(unsigned char* data)
 
 	const int pixels = rows * columns;
 
+	this->inputs.reserve(numberOfItems);
+
 	for(int i = imagesSkip; i < imagesLimit;)
 	{
 		//TODO - is there a more efficient way to do this? Aren't I just invoking copy constructor all the time?
-		Matrix newMatrix(pixels, 1);
-	
+		this->inputs.push_back(Matrix(pixels, 1));
+
 		for(int j = 0; j < pixels; j++, i++)
 		{
-			newMatrix(j, 0) = data[i];
+			this->inputs.back()(j, 0) = data[i];
 		}
-				
-		this->inputs.push_back(newMatrix);
 	}
 }
 
@@ -70,14 +95,13 @@ void HandWriting::formatAndStoreLabelData(unsigned char* data)
 	const int labelsSkip = 4 + 4; //skipping magic number, number of items
 	const int labelsLimit = numberOfItems + labelsSkip;
 
+	this->outputs.reserve(numberOfItems);
+
 	for(int i = labelsSkip; i < labelsLimit; i++)
 	{
-		Matrix newMatrix(10, 1);
-		
-		newMatrix(data[i], 0) = 1.0;
-		
-		//TODO - maybe pointer to matrix to avoid duplication?
-		this->outputs.push_back(newMatrix);
+		this->outputs.push_back(Matrix(10,1));
+			
+		this->outputs.back()(data[i], 0) = 1.0;
 	}
 }
 
