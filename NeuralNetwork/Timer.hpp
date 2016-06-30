@@ -14,6 +14,8 @@ using std::vector;
 
 class Timer
 {
+	//TODO - add verbose setting that prints everything to console
+	//TODO - add suffix indicating time units (e.g. seconds) and include 2 decimal places
 	private:
 		vector<clock_t> timestamps;	
 		vector<string> identifiers;
