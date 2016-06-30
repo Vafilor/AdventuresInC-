@@ -31,6 +31,7 @@ class Matrix
 		Matrix();
         Matrix(unsigned int rows, unsigned int columns) throw(invalid_argument);
         Matrix(const Matrix& that);
+        Matrix(Matrix&& that);
         ~Matrix();
         
 
@@ -58,6 +59,7 @@ class Matrix
         inline Matrix operator-(const Matrix& that) const;
 		Matrix operator*(const Matrix& that) const throw(invalid_argument);
 		Matrix& operator=(const Matrix& that);
+		Matrix& operator=(Matrix&& that);
 
 		const Matrix& operator*=(double scalar);
 		inline const Matrix& operator/=(double scalar);

@@ -56,6 +56,15 @@ Matrix::Matrix(const Matrix& that)
 	}
 }
 
+Matrix::Matrix(Matrix&& that)
+{
+	this->entries = that.entries;
+	this->rows = that.rows;
+	this->columns = that.columns;
+	
+	that.entries = nullptr;
+}
+
 Matrix::~Matrix()
 {
 	this->freeEntriesMemory();
@@ -63,6 +72,11 @@ Matrix::~Matrix()
 
 void Matrix::freeEntriesMemory()
 {
+	if(this->entries == nullptr)
+	{
+		return;
+	}
+
 	for(int i = 0; i < this->rows; i++) 
     {	
         delete[] this->entries[i];
@@ -144,6 +158,19 @@ Matrix& Matrix::operator=(const Matrix& that)
 			this->entries[i][j] = that.entries[i][j];	
 		}
 	}
+	
+	return *this;
+}
+
+Matrix& Matrix::operator=(Matrix&& that)
+{
+	this->freeEntriesMemory();
+
+	this->entries = that.entries;
+	this->rows = that.rows;
+	this->columns = that.columns;
+	
+	that.entries = nullptr;
 	
 	return *this;
 }
