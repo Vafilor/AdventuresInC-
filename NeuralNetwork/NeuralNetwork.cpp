@@ -216,6 +216,8 @@ void NeuralNetwork::updateMiniBatch(const NeuralNetworkData& trainingData, pair<
 
 void NeuralNetwork::createBlankCopy(vector<Matrix>& matrices, const vector<Matrix> original)
 {
+	matrices.reserve(original.size());
+
 	for(int i = 0; i < original.size(); i++)
 	{
 		matrices.push_back(Matrix( original[i].getRows(), original[i].getColumns() ));
