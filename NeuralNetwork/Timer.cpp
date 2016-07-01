@@ -9,8 +9,10 @@ using std::endl;
 using std::ostream;
 using std::string;
 
-Timer::Timer()
-{	
+void Timer::setVerbose(bool verbose, ostream* os)
+{
+	this->verbose = verbose;
+	this->output = os;
 }
 
 void Timer::mark() throw (runtime_error)
@@ -21,6 +23,10 @@ void Timer::mark() throw (runtime_error)
 	}
 
 	this->timestamps.push_back( time(0) );
+	
+	if(this->verbose && this->output != nullptr) {
+		outputElapsedTime(*this->output, this->identifiers.back(), this->timestamps[ this->timestamps.size() - 2], this->timestamps.back());
+	}	
 }
 
 void Timer::mark(const string& identifier) throw (runtime_error)
@@ -36,14 +42,21 @@ void Timer::mark(const string& identifier) throw (runtime_error)
 
 ostream& operator<<(ostream& os, const Timer& timer)
 {
-	double timeElapsed = 0.0;
-
 	for(int i = 0; i < timer.timestamps.size(); i += 2)
 	{
-		timeElapsed = difftime(timer.timestamps[i + 1], timer.timestamps[i]);
-	
-		os << timer.identifiers[i / 2] << ":" << timeElapsed << endl;
+		Timer::outputElapsedTime(os, timer.identifiers[i / 2], timer.timestamps[i], timer.timestamps[i+1]);
 	}
 	
+	Timer::outputElapsedTime(os, "Total Time", timer.timestamps.front(), timer.timestamps.back());
+	
 	return os;
+}
+
+double Timer::outputElapsedTime(ostream& os, const string& message, const clock_t& start, const clock_t& end)
+{
+	//TODO 2 decimal place formatting
+	double timeElapsed = difftime(end, start);
+	os << message << ": " << timeElapsed << " seconds" << endl;
+	
+	return timeElapsed;
 }
