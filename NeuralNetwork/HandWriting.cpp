@@ -83,7 +83,7 @@ void HandWriting::formatAndStoreImageData(unsigned char* data)
 
 		for(int j = 0; j < pixels; j++, i++)
 		{
-			this->inputs.back()(j, 0) = data[i];
+			this->inputs.back()(j, 0) = (double)data[i] / 255.0;
 		}
 	}
 }
