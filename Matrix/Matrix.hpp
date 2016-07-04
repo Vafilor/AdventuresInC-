@@ -38,8 +38,8 @@ class Matrix
 		//Getters & Setters
         inline unsigned int getRows() const;
         inline unsigned int getColumns() const;
-		inline double & operator()(unsigned int row, unsigned int column);
-		inline const double & operator()(unsigned int row, unsigned int column) const;
+		inline double & operator()(unsigned int row, unsigned int column) throw (invalid_argument);
+		inline const double & operator()(unsigned int row, unsigned int column) const throw(invalid_argument);
 
 		//Unary Operators & Methods
 		
@@ -97,15 +97,23 @@ Matrix Matrix::operator-(const Matrix& that) const
 	return (*this) + (-that);
 }
 
-double& Matrix::operator()(unsigned int row, unsigned int column) 
+double& Matrix::operator()(unsigned int row, unsigned int column) throw(invalid_argument)
 {
-	//TODO bounds checking?
+	if(row >= this->rows || column >= this->columns) 
+	{
+		throw invalid_argument("Access out of bounds");
+	}
+
 	return this->entries[row][column];
 }
 
-const double& Matrix::operator()(unsigned int row, unsigned int column) const 
+const double& Matrix::operator()(unsigned int row, unsigned int column) const throw(invalid_argument)
 {
-	//TODO bounds checking?
+	if(row >= this->rows || column >= this->columns) 
+	{
+		throw invalid_argument("Access out of bounds");
+	}
+
 	return this->entries[row][column];
 }
 
