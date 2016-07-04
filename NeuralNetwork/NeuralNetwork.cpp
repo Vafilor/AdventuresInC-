@@ -56,7 +56,7 @@ int NeuralNetwork::evaluate(const NeuralNetworkData& data)
 	for(int i = 0; i < data.size(); i++)
 	{
 		result = this->feedForward( data[i].getInput() );
-		
+
 		if( NeuralNetwork::getLargestRow(result) == NeuralNetwork::getLastNonZeroRow(data[i].getOutput()) )
 		{
 			totalCorrect++;
@@ -89,8 +89,8 @@ void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epoc
 
 void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<Matrix>& outputWeights, vector<Matrix>& outputBiases)
 {
-	createBlankCopy(outputWeights, this->weights);
-	createBlankCopy(outputBiases, this->biases);
+	createBlankCopy(this->weights, outputWeights);
+	createBlankCopy(this->biases, outputBiases);
 	
 	vector<Matrix> zs;
 	vector<Matrix> activations;
@@ -152,7 +152,7 @@ Matrix NeuralNetwork::gaussianDistribution(unsigned rows, unsigned columns)
 	{
 		for(int j = 0; j < columns; j++)
 		{
-			value = 2;//(double)rand() / (double)RAND_MAX;
+			value = 0;//(double)rand() / (double)RAND_MAX;
 			matrix(i, j) = value;
 		}
 	}	
@@ -185,8 +185,8 @@ void NeuralNetwork::updateMiniBatch(const NeuralNetworkData& trainingData, pair<
 	vector<Matrix> nabla_w;
 	vector<Matrix> delta_nabla_w;
 
-	createBlankCopy(nabla_b, this->biases);
-	createBlankCopy(nabla_w, this->weights);
+	createBlankCopy(this->biases, nabla_b);
+	createBlankCopy(this->weights, nabla_w);
 
 
 	for(v_int i = limits.first; i < limits.second; i++)
@@ -214,13 +214,14 @@ void NeuralNetwork::updateMiniBatch(const NeuralNetworkData& trainingData, pair<
 	}
 }
 
-void NeuralNetwork::createBlankCopy(vector<Matrix>& matrices, const vector<Matrix> original)
+void NeuralNetwork::createBlankCopy(const vector<Matrix> original, vector<Matrix>& destination)
 {
-	matrices.reserve(original.size());
+	destination.clear();
+	destination.reserve(original.size());
 
 	for(int i = 0; i < original.size(); i++)
 	{
-		matrices.push_back(Matrix( original[i].getRows(), original[i].getColumns() ));
+		destination.push_back(Matrix( original[i].getRows(), original[i].getColumns() ));
 	}
 }
 

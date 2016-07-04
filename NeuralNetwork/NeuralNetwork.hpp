@@ -74,12 +74,25 @@ class NeuralNetwork
 		static Matrix gaussianDistribution(unsigned int rows, unsigned int columns);
 		static Matrix costDerivative(const Matrix& outputActivations, const Matrix& output);
 
-		/**
-		 * Modifies incoming matrices container to have 0 filled matrices, where each matrix has the same size as a matrix in orignal, done in order. 
-		*/
-		static void createBlankCopy(vector<Matrix>& matrices, const vector<Matrix> original);
+		/*
+		 * Input: A Mx1 sized matrix. Can be MxN but only the first row will be considered.
+		 * returns: The index of the largest value in the row, or 0 if the values are all the same.
+		 */
 		static unsigned int getLargestRow(const Matrix& matrix);
+
+		/*
+		 * Input: A Mx1 sized matrix. Can be MxN but only the first row will be considered.
+	     * returns: The index of the first greater than zero entry, starting from the end of the row. 
+		 *			-1 if all entries are less than or equal to 0.
+		 */
 		static int getLastNonZeroRow(const Matrix& matrix);
+
+		/**
+		 * Modifies destination to be of the same size as original and have 0 filled matrices, 
+		 * where each matrix has the same size as a matrix in orignal, done in order. 
+		*/
+		static void createBlankCopy(const vector<Matrix> original, vector<Matrix>& destination);
+
 
 		/*
 		 * Returns a collection of pairs of ints such that the range from [start, end) is split up into ranges of size length, that is [i, i + size).
@@ -99,7 +112,6 @@ class NeuralNetwork
 	public:
 		NeuralNetwork(const vector<int>& layerSizes);
 		~NeuralNetwork();
-
 	
 		/*
 			input is expected to be a rows x 1 matrix. Input to the neural network. 
