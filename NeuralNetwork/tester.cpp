@@ -95,19 +95,73 @@ BOOST_AUTO_TEST_CASE( getLastNonZeroRow )
 
 BOOST_AUTO_TEST_CASE( createBlankCopy )
 {
-	//Test 0 matrices
-	//Test 1
-	//Test 3 
-		//Make sure all entries 0
-		//Trying doing it twice to the same existing vector - making sure it wipes data
-
 	vector<Matrix> emptyVector;
 	vector<Matrix> copy;
 
 	NeuralNetwork::createBlankCopy(emptyVector, copy);
 
 	BOOST_TEST(copy.size() == 0);
+	
+	
+	//All matrix entries are non-zero to ensure blank copy is creating 0 filled values.
+	Matrix oneByOne(1,1);
+	oneByOne(0,0) = 5.0;
+	
+	Matrix twoByTwo(2,2);
+	twoByTwo(0,0) = 1.0;
+	twoByTwo(0,1) = 1.5;
+	twoByTwo(1,0) = 2.5;
+	twoByTwo(1,1) = 3.5;	
+	
+	Matrix threeByFive(3,5);
+	
+	for(int i = 0; i < threeByFive.getRows(); i++)
+	{
+		for(int j = 0; j < threeByFive.getColumns(); j++)
+		{
+			threeByFive(i,j) = (i + 1) * (j - 10); //Random non-zero values. No significance other than non-zero.
+		}
+	}
+	
+	vector<Matrix> singleVector;
+	singleVector.push_back(oneByOne);
+	
+	NeuralNetwork::createBlankCopy(singleVector, copy);
+	
+	//Make sure we get one matrix of size 1x1
+	BOOST_TEST(copy.size() == 1);
+	BOOST_TEST(copy[0].getRows() == 1);
+	BOOST_TEST(copy[0].getColumns() == 1);
+	testAllEntriesZero(copy[0]);
 
+	//Make sure method is clearing out copy before adding new data in
+	NeuralNetwork::createBlankCopy(singleVector, copy);
+	
+	BOOST_TEST(copy.size() == 1);
+	
+	//Test 3 matrices
+	vector<Matrix> tripleVector;
+	tripleVector.push_back(oneByOne);
+	tripleVector.push_back(twoByTwo);
+	tripleVector.push_back(threeByFive);
+	
+	NeuralNetwork::createBlankCopy(tripleVector, copy);
+	
+	BOOST_TEST(copy.size() == 3);
+	
+	BOOST_TEST(copy[0].getRows() == 1);
+	BOOST_TEST(copy[0].getColumns() == 1);
+	
+	BOOST_TEST(copy[1].getRows() == 2);
+	BOOST_TEST(copy[1].getColumns() == 2);
+	
+	BOOST_TEST(copy[2].getRows() == 3);
+	BOOST_TEST(copy[2].getColumns() == 5);
+	
+	for(int i = 0; i < copy.size(); i++)
+	{
+		testAllEntriesZero(copy[i]);
+	}
 }
 
 void testAllEntriesZero(const Matrix& matrix)
