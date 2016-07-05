@@ -106,7 +106,14 @@ class NeuralNetwork
 		void updateMiniBatch(const NeuralNetworkData& trainingData, pair<v_int, v_int> limits, double eta); 
 		static void addInto(vector<Matrix>& matrices, const vector<Matrix>& delta) throw(invalid_argument);
 	
-		//zs and activations are expected to be empty.
+		/*
+		 * Note: a z is the value of a layer in the Neural Network before it has had the Sigmoid function applied. 	
+		 *
+		 * Give the input matrix, populates zs with the z-value of each layer in the NeuralNetwork.
+		 * Also populates activations with the activation of each layer in the NeuralNetwork.
+		 * 
+		 * Incoming zs and activations are wiped of the original data.
+		*/
 		void calculateZsAndActivations(const Matrix& input, vector<Matrix>& zs, vector<Matrix>& activations);
 		
 	public:

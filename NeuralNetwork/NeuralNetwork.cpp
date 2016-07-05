@@ -227,6 +227,12 @@ void NeuralNetwork::createBlankCopy(const vector<Matrix> original, vector<Matrix
 
 void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix>& zs, vector<Matrix>& activations)
 {
+	zs.clear();
+	activations.clear();
+	
+	zs.reserve(this->biases.size());
+	activations.reserve(this->biases.size());
+
 	Matrix z;
 	Matrix activation = input;
 

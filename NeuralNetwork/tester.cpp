@@ -10,7 +10,13 @@ namespace tt = boost::test_tools;
 
 const double TOLERANCE = 0.0001;
 
+/*
+ * Sets all the weights in the NeuralNetwork to have value weightValue.
+ * Sets all the biases in the NeuralNetwork to have value biasValue.
+*/
+void normalizeNeuralNetwork(NeuralNetwork& net, double weightValue, double biasValue);
 void testAllEntriesZero(const Matrix& matrix);
+
 
 BOOST_AUTO_TEST_CASE( constructor_test )
 {
@@ -164,6 +170,76 @@ BOOST_AUTO_TEST_CASE( createBlankCopy )
 	}
 }
 
+BOOST_AUTO_TEST_CASE( calculateZsAndActivations )
+{
+	//First set up neural network with expected data - all 0's, all 0.5s, all 0.65s, etc
+	//Test method above by passing in 3 matrices with various values and make sure that each z and activation is as expected.
+	
+	vector<Matrix> zs;
+	vector<Matrix> activations;
+	
+	vector<int> networkSizes;
+	networkSizes.push_back(3);
+	networkSizes.push_back(4);
+	networkSizes.push_back(3);
+	
+	NeuralNetwork network(networkSizes);
+	normalizeNeuralNetwork(network, 0.0, 0.0);
+
+	Matrix input1(3,1);
+	input1(0,0) = 0.0;
+	input1(1,0) = 0.0;
+	input1(2,0) = 0.0;
+	
+	Matrix input2(3,1);
+	input2(0,0) = 0.1;
+	input2(1,0) = 0.2;
+	input2(2,0) = 0.75;
+
+	Matrix input3(3,1);
+	input3(0,0) = 1.0;
+	input3(1,0) = 1.0;
+	input3(2,0) = 1.0;
+
+	network.calculateZsAndActivations(input1, zs, activations);
+	
+	//TODO error here - they are not going to be all zero. Create reference with exact values then compare.
+	for( Matrix& matrix : zs )
+	{
+		testAllEntriesZero(matrix);
+	}
+	
+	for( Matrix& matrix : activations )
+	{
+		testAllEntriesZero( matrix);
+	}
+	
+	network.calculateZsAndActivations(input2, zs, activations);
+
+	for( Matrix& matrix : zs )
+	{
+		testAllEntriesZero(matrix);
+	}
+	
+	for( Matrix& matrix : activations )
+	{
+		testAllEntriesZero( matrix);
+	}
+	
+	network.calculateZsAndActivations(input3, zs, activations);
+	
+	for( Matrix& matrix : zs )
+	{
+		testAllEntriesZero(matrix);
+	}
+	
+	for( Matrix& matrix : activations )
+	{
+		testAllEntriesZero( matrix);
+	}
+	
+}
+
 void testAllEntriesZero(const Matrix& matrix)
 {
 	for(int i = 0; i < matrix.getRows(); i++)
@@ -173,4 +249,33 @@ void testAllEntriesZero(const Matrix& matrix)
 			BOOST_TEST(matrix(i,j) == 0.0, tt::tolerance(TOLERANCE));
 		}
 	}	
+}
+
+void normalizeNeuralNetwork(NeuralNetwork& net, double weightValue, double biasValue)
+{
+	for(int i = 0; i < net.weights.size(); i++)
+	{
+		Matrix& weight = net.weights[i];
+		
+		for(int row = 0; row < weight.getRows(); row++)
+		{
+			for(int column = 0; column < weight.getColumns(); column++)
+			{
+				weight(row, column) = weightValue;
+			}
+		}
+	}
+
+	for(int i = 0; i < net.biases.size(); i++)
+	{
+		Matrix& bias = net.biases[i];
+		
+		for(int row = 0; row < bias.getRows(); row++)
+		{
+			for(int column = 0; column < bias.getColumns(); column++)
+			{
+				bias(row, column) = biasValue;
+			}
+		}
+	}
 }
