@@ -321,7 +321,7 @@ Matrix Matrix::multiplyEntries(const Matrix& that) const throw(invalid_argument)
 	{
 		for(int j = 0; j < this->columns; j++)
 		{
-			this->entries[i][j] *= that.entries[i][j];
+			result.entries[i][j] *= that.entries[i][j];
 		}
 	}
 
