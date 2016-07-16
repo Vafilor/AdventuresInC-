@@ -16,6 +16,7 @@ const double TOLERANCE = 0.0001;
 */
 void normalizeNeuralNetwork(NeuralNetwork& net, double weightValue, double biasValue);
 void testAllEntriesZero(const Matrix& matrix);
+void testAllEntries(const Matrix& matrix, double value);
 
 
 BOOST_AUTO_TEST_CASE( constructor_test )
@@ -172,9 +173,8 @@ BOOST_AUTO_TEST_CASE( createBlankCopy )
 
 BOOST_AUTO_TEST_CASE( calculateZsAndActivations )
 {
-	//First set up neural network with expected data - all 0's, all 0.5s, all 0.65s, etc
-	//Test method above by passing in 3 matrices with various values and make sure that each z and activation is as expected.
-	
+	//TODO would be beneficial to have another test case with all wieghts and biases not zero	
+	//TODO make sure the weights/biases dimensions are correct - make a test for it
 	vector<Matrix> zs;
 	vector<Matrix> activations;
 	
@@ -202,51 +202,83 @@ BOOST_AUTO_TEST_CASE( calculateZsAndActivations )
 	input3(2,0) = 1.0;
 
 	network.calculateZsAndActivations(input1, zs, activations);
-	
-	//TODO error here - they are not going to be all zero. Create reference with exact values then compare.
+
+	//All zs for input1 should be 0
 	for( Matrix& matrix : zs )
 	{
 		testAllEntriesZero(matrix);
 	}
 	
-	for( Matrix& matrix : activations )
-	{
-		testAllEntriesZero( matrix);
-	}
+	//The first activation is going to be all 0s
+	//The second and third activations are going to all be 0.5
+	testAllEntriesZero(activations[0]);
+	testAllEntries(activations[1], 0.5);
+	testAllEntries(activations[2], 0.5);
 	
 	network.calculateZsAndActivations(input2, zs, activations);
 
+	//All zs for input2 should be 0
 	for( Matrix& matrix : zs )
 	{
 		testAllEntriesZero(matrix);
 	}
 	
-	for( Matrix& matrix : activations )
-	{
-		testAllEntriesZero( matrix);
-	}
+	//First activiation is 0.1, 0.2 0.75 
+	BOOST_TEST(activations[0](0,0) == 0.1, tt::tolerance(TOLERANCE));
+	BOOST_TEST(activations[0](1,0) == 0.2, tt::tolerance(TOLERANCE));
+	BOOST_TEST(activations[0](2,0) == 0.75, tt::tolerance(TOLERANCE));
+
+	//Remaining activations are 0.5 in each entry
+	testAllEntries(activations[1], 0.5);
+	testAllEntries(activations[2], 0.5);
 	
 	network.calculateZsAndActivations(input3, zs, activations);
 	
+	//All Zs should be 0
 	for( Matrix& matrix : zs )
 	{
 		testAllEntriesZero(matrix);
 	}
-	
-	for( Matrix& matrix : activations )
-	{
-		testAllEntriesZero( matrix);
-	}
-	
+
+	testAllEntries(activations[0], 1);
+	testAllEntries(activations[1], 0.5);
+	testAllEntries(activations[2], 0.5);
+}
+
+BOOST_AUTO_TEST_CASE( costDerivative )
+{
+	Matrix values(2,2);
+	values(0,0) = 0.1;
+	values(0,1) = 0.2;
+	values(1,0) = 0.3;
+	values(1,1) = -1.0;
+
+	Matrix values2(2,2);
+	values2(0,0) = 0.3;
+	values2(0,1) = -0.6;
+	values2(1,0) = 0.5;
+	values2(1,1) = 0.75;
+
+	Matrix result = NeuralNetwork::costDerivative(values, values2);
+
+	BOOST_TEST(result(0,0) == -0.2, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(0,1) == 0.8, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(1,0) == -0.2, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(1,1) == -1.75, tt::tolerance(TOLERANCE));
 }
 
 void testAllEntriesZero(const Matrix& matrix)
+{
+	testAllEntries(matrix, 0.0);
+}
+
+void testAllEntries(const Matrix& matrix, double value)
 {
 	for(int i = 0; i < matrix.getRows(); i++)
 	{
 		for(int j = 0; j < matrix.getColumns(); j++)
 		{
-			BOOST_TEST(matrix(i,j) == 0.0, tt::tolerance(TOLERANCE));
+			BOOST_TEST(matrix(i,j) == value, tt::tolerance(TOLERANCE));
 		}
 	}	
 }
