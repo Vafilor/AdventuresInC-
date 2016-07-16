@@ -75,9 +75,10 @@ void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epoc
 	{
 		//TODO shuffle partition
 		//TODO for each loop
-		for(int j = 0; j < trainingDataPartition.size(); j++)
+		
+		for( pair<int,int> subset : trainingDataPartition )
 		{
-			this->updateMiniBatch(trainingData, trainingDataPartition[i], eta);
+			this->updateMiniBatch(trainingData, subset, eta);
 		}
 	
 		if(testData.size() > 0)
@@ -117,6 +118,8 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 
 void NeuralNetwork::partition(int start, int end, int size, vector <pair<int,int> >& pairs)
 {
+	pairs.clear();
+
 	int endOfRange = 0;
 	
 	for(int i = start; i < end; i += size)
@@ -152,7 +155,7 @@ Matrix NeuralNetwork::gaussianDistribution(unsigned rows, unsigned columns)
 	{
 		for(int j = 0; j < columns; j++)
 		{
-			value = 0;//(double)rand() / (double)RAND_MAX;
+			value = 0;//(double)rand() / (double)RAND_MAX; //TODO
 			matrix(i, j) = value;
 		}
 	}	
@@ -187,7 +190,6 @@ void NeuralNetwork::updateMiniBatch(const NeuralNetworkData& trainingData, pair<
 
 	createBlankCopy(this->biases, nabla_b);
 	createBlankCopy(this->weights, nabla_w);
-
 
 	for(v_int i = limits.first; i < limits.second; i++)
 	{
@@ -295,4 +297,23 @@ int NeuralNetwork::getLastNonZeroRow(const Matrix& matrix)
     }
 
     return -1;
+}
+
+ostream& operator<<(ostream& os, NeuralNetwork& network)
+{
+	os << "Weights" << endl << endl;
+
+	for(Matrix& matrix : network.weights)
+	{
+		os << matrix << endl << endl;
+	}
+
+	os << "Biases" << endl << endl;
+
+	for(Matrix& matrix : network.biases)
+	{
+		os << matrix << endl << endl;
+	}
+
+	return os;
 }

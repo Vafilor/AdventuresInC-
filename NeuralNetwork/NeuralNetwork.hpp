@@ -6,6 +6,7 @@
 #include <utility>
 #include "Matrix.hpp" 
 #include <stdexcept>
+#include <iostream>
 
 #ifndef NEURAL_NETWORK_H
 #define NEURAL_NETWORK_H
@@ -13,6 +14,7 @@
 
 using std::vector;
 using std::pair;
+using std::ostream;
 
 typedef vector<int>::size_type v_int;
 typedef vector<Matrix>::size_type m_int;
@@ -103,6 +105,7 @@ class NeuralNetwork
 
 		//outputWeights and biases are expected to be empty.
 		void backprop(const Matrix& input, const Matrix& output, vector<Matrix>& outputWeights, vector<Matrix>& outputBiases);
+		//TODO pair pass by reference?
 		void updateMiniBatch(const NeuralNetworkData& trainingData, pair<v_int, v_int> limits, double eta); 
 		static void addInto(vector<Matrix>& matrices, const vector<Matrix>& delta) throw(invalid_argument);
 	
@@ -121,15 +124,16 @@ class NeuralNetwork
 		~NeuralNetwork();
 	
 		/*
-			input is expected to be a rows x 1 matrix. Input to the neural network. 
-			Returns the result from the network.
+		 * input is expected to be a rows x 1 matrix. Input to the neural network. 
+		 * Returns the result from the network.
 		*/
 		Matrix feedForward(const Matrix& input);
 		int evaluate(const NeuralNetworkData& data);
 		
-
 		inline void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta);
 		void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData );		
+
+		friend ostream& operator<<(ostream& os, NeuralNetwork& network);
 };
 
 void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta)
