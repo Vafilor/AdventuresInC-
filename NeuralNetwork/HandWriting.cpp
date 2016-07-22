@@ -8,32 +8,14 @@ using namespace std;
 
 HandWriting::HandWriting(string imageDataFilePath, string labelDataFilePath)
 {
-	Timer timer;
-	
-	timer.mark("Load Raw Images");
 	unsigned char* imageData = loadFileData(imageDataFilePath);
-	timer.mark();
-	
-	timer.mark("Load Raw Labels");
 	unsigned char* labelData = loadFileData(labelDataFilePath);
-	timer.mark();
 	
-	timer.mark("Format Images");
-	
-	this->formatAndStoreImageData(imageData);
-	
-	timer.mark();
-	
-	timer.mark("Format Labels");
+	this->formatAndStoreImageData(imageData);	
 	this->formatAndStoreLabelData(labelData);
-	timer.mark();
-	
-	timer.mark("Wrap Data");
+
 	this->wrapData();
-	timer.mark();
-	
-	cout << timer << endl << endl;
-	
+
 	delete[] imageData;
 	delete[] labelData;
 }

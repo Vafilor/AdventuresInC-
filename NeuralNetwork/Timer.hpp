@@ -1,8 +1,7 @@
-#include <ctime>
+#include <chrono>
 #include <vector>
 #include <ostream>
 #include <stdexcept>
-
 
 #ifndef TIMER_H
 #define TIMER_H
@@ -12,6 +11,9 @@ using std::runtime_error;
 using std::string;
 using std::vector;
 
+using std::chrono::system_clock;
+
+
 class Timer
 {
 	//TODO - add verbose setting that prints everything to console
@@ -20,14 +22,14 @@ class Timer
 		bool verbose;
 		ostream* output;
 		
-		vector<clock_t> timestamps;	
+		vector<system_clock::time_point> timestamps;	
 		vector<string> identifiers;
 
 		/**
 		* Outputs the elapsed time between start and end in seconds with two decimal places. 
 		* Returns the elapsed time in seconds.
 		*/			
-		static double outputElapsedTime(ostream& os, const string& message, const clock_t& start, const clock_t& end);	
+		static std::chrono::duration<double> outputElapsedTime(ostream& os, const string& message, const system_clock::time_point& start, const system_clock::time_point& end);	
 		
 	public:
 		Timer() : verbose(false) {};
