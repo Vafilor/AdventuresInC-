@@ -1,7 +1,7 @@
 //Matrix.cpp
 //By Andrey Melnikov
 
-#include "Matrix.hpp"
+#include "Matrix.h"
 #include <stdexcept>
 #include <iostream> //For debugging
 #include <string>
@@ -14,7 +14,7 @@ Matrix::Matrix()
 	this->columns = 0;
 }
 
-Matrix::Matrix(unsigned int rows, unsigned int columns) throw(invalid_argument)
+Matrix::Matrix(unsigned int rows, unsigned int columns)
 {
 	if(rows == 0 || columns == 0)
 	{
@@ -88,27 +88,17 @@ void Matrix::freeEntriesMemory()
 	}
 }
 
-Matrix Matrix::operator+(const Matrix& that) const throw(invalid_argument)
+Matrix Matrix::operator+(const Matrix& that) const
 {
 	if(this->rows != that.rows || this->columns != that.columns)
 	{
 		throw invalid_argument("Matrix summation not defined for matrices");
 	}
 
-    Matrix copy(this->rows, this->columns);
-    
-    for(int i = 0; i < this->getRows(); i++)
-    {
-        for(int j = 0; j < this->getColumns(); j++)
-        {
-            copy.entries[i][j] = this->entries[i][j] + that.entries[i][j];
-        }
-    }    
-    
-    return copy;  
+    return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return entries[i][j] + that.entries[i][j]; });
 }
 
-Matrix Matrix::operator*(const Matrix& that) const throw(invalid_argument)
+Matrix Matrix::operator*(const Matrix& that) const
 {
 	if(this->columns != that.rows)
 	{
@@ -175,39 +165,9 @@ Matrix& Matrix::operator=(Matrix&& that)
 	return *this;
 }
 
-void Matrix::applyFunctionInto(double (*function)(double entry) )
-{
-	for(int i = 0; i < this->rows; i++)
-	{
-		for(int j = 0; j < this->columns; j++)
-		{
-			this->entries[i][j] = function(this->entries[i][j]);
-		}
-	}
-}
-
-Matrix Matrix::applyFunction( double (*function)(double entry) )
-{
-	Matrix copy(*this);
-
-	copy.applyFunctionInto(function);
-
-	return copy;
-}
-
 Matrix operator*(const Matrix& that, double scalar)
 {
-    Matrix copy = Matrix::createUninitializedMatrix(that.rows, that.columns);
-    
-    for(int i = 0; i < that.getRows(); i++)
-    {
-        for(int j = 0; j < that.getColumns(); j++)
-        {
-            copy.entries[i][j] = that.entries[i][j] * scalar;
-        }
-    }    
-    
-    return copy;
+	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.entries[i][j] * scalar; });
 }
 
 bool operator==(const Matrix & a, const Matrix& b)
@@ -258,7 +218,7 @@ const Matrix& Matrix::operator*=(double scalar)
 	return *this;
 }
 
-const Matrix& Matrix::operator+=(const Matrix& that) throw(invalid_argument)
+const Matrix& Matrix::operator+=(const Matrix& that)
 {
 	if(this->rows != that.rows || this->columns != that.columns)
 	{
@@ -276,55 +236,72 @@ const Matrix& Matrix::operator+=(const Matrix& that) throw(invalid_argument)
 	return *this;
 }
 
-Matrix Matrix::createUninitializedMatrix(unsigned int rows, unsigned int columns)
-{
-	Matrix result;
-	
-	result.rows = rows;
-	result.columns = columns;
-
-	result.entries = new double*[rows];
-
-	for(int i = 0; i < rows; i++)
-	{
-		result.entries[i] = new double[columns];
-	}
-
-	return result;
-}
-
 Matrix Matrix::transpose()
 {
-	Matrix transpose = createUninitializedMatrix(this->columns, this->rows);
-
-	for(int i = 0; i < transpose.rows; i++)
-	{
-		for(int j = 0; j < transpose.columns; j++)
-		{
-			transpose.entries[i][j] = this->entries[j][i];
-		}
-	}
-	
-	return transpose;
+	return Matrix(this->columns, this->rows, [&](unsigned int i, unsigned int j) { return entries[j][i]; });
 }
 
-Matrix Matrix::multiplyEntries(const Matrix& that) const throw(invalid_argument)
+Matrix Matrix::multiplyEntries(const Matrix& that) const
 {
 	if(this->rows != that.rows || this->columns != that.columns)
 	{
 		throw invalid_argument("multiplyEntry - matrices of incompatible size");
 	}
 
-	Matrix result(*this);
-
-	for(int i = 0; i < this->rows; i++)
-	{
-		for(int j = 0; j < this->columns; j++)
-		{
-			result.entries[i][j] *= that.entries[i][j];
-		}
-	}
-
-	return result;
+	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return entries[i][j] * that.entries[i][j]; });
 }
 
+Matrix Matrix::operator-(const Matrix& that) const
+{
+	return (*this) + (-that);
+}
+
+double& Matrix::operator()(unsigned int row, unsigned int column)
+{
+	if(row >= this->rows || column >= this->columns) 
+	{
+		throw invalid_argument("Access out of bounds");
+	}
+
+	return this->entries[row][column];
+}
+
+double Matrix::operator()(unsigned int row, unsigned int column) const
+{
+	if(row >= this->rows || column >= this->columns) 
+	{
+		throw invalid_argument("Access out of bounds");
+	}
+
+	return this->entries[row][column];
+}
+
+unsigned int Matrix::getRows() const 
+{	
+	return this->rows;
+}
+
+unsigned int Matrix::getColumns() const 
+{
+	return this->columns;
+}
+
+Matrix Matrix::operator-() const 
+{ 
+	return (*this) * -1.0; 
+}
+
+const Matrix& Matrix::operator/=(double scalar) 
+{
+	return (*this) *= 1.0/scalar; 
+}
+
+const Matrix& Matrix::operator-=(const Matrix& that)
+{
+	return (*this) += -that; 
+}
+
+Matrix operator*(double scalar, const Matrix& that)
+{
+	return that * scalar;
+}
