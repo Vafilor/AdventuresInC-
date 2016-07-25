@@ -1,7 +1,7 @@
-#include "HandWriting.hpp"
+#include "HandWriting.h"
 #include <fstream>
 #include <string>
-#include "Timer.hpp"
+#include "Timer.h"
 #include <iostream>
 
 using namespace std;
