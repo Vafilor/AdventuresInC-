@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <utility>
-#include "Matrix.hpp" 
+#include "Matrix.h" 
 #include <stdexcept>
 #include <iostream>
 
@@ -107,7 +107,7 @@ class NeuralNetwork
 		void backprop(const Matrix& input, const Matrix& output, vector<Matrix>& outputWeights, vector<Matrix>& outputBiases);
 		//TODO pair pass by reference?
 		void updateMiniBatch(const NeuralNetworkData& trainingData, pair<v_int, v_int> limits, double eta); 
-		static void addInto(vector<Matrix>& matrices, const vector<Matrix>& delta) throw(invalid_argument);
+		static void addInto(vector<Matrix>& matrices, const vector<Matrix>& delta);
 	
 		/*
 		 * Note: a z is the value of a layer in the Neural Network before it has had the Sigmoid function applied. 	
@@ -130,19 +130,23 @@ class NeuralNetwork
 		Matrix feedForward(const Matrix& input);
 		int evaluate(const NeuralNetworkData& data);
 		
-		inline void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta);
+		void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta);
 		void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData );		
 
 		friend ostream& operator<<(ostream& os, NeuralNetwork& network);
 };
 
-void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta)
-{
-	this->SGD(trainingData, epochs, miniBatchSize, eta, NeuralNetworkData());
-}
 
 double sigmoid(double value);
-double sigmoidPrime(double value);
 
+struct Sigmoid
+{
+	double operator()(double value);
+};
+
+struct SigmoidPrime
+{
+	double operator()(double value);
+};
 
 #endif

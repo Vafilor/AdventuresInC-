@@ -1,9 +1,10 @@
-#include "NeuralNetwork.hpp"
-#include "Matrix.hpp"
+#include "NeuralNetwork.h"
+#include "Matrix.h"
 #include <stdexcept>
 #include <cstdlib>
 #include <iostream> //For debugging
 #include <cmath>
+#include "Timer.h"
 
 
 using namespace std;
@@ -42,7 +43,7 @@ Matrix NeuralNetwork::feedForward(const Matrix& input)
     for(int i = 0; i < this->biases.size(); i++)
 	{
 		result = ((this->weights[i] * result) + this->biases[i]);
-		result.applyFunctionInto(sigmoid);
+		result.applyFunctionInto(Sigmoid());
 	}
 
     return result;
@@ -66,20 +67,32 @@ int NeuralNetwork::evaluate(const NeuralNetworkData& data)
 	return totalCorrect;
 }
 
-void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData )		
+void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta)
 {
+	this->SGD(trainingData, epochs, miniBatchSize, eta, NeuralNetworkData());
+}
+
+void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData )		
+{	
 	vector <pair<int,int> > trainingDataPartition;
     partition(0, trainingData.size(), miniBatchSize, trainingDataPartition);
+
+	Timer timer;
+	timer.setVerbose(true, &cout);
 
 	for(int i = 1; i <= epochs; i++)
 	{
 		//TODO shuffle partition
 		//TODO for each loop
 		
+		timer.mark("Epoch");
+		
 		for( pair<int,int> subset : trainingDataPartition )
 		{
 			this->updateMiniBatch(trainingData, subset, eta);
 		}
+		
+		timer.mark();
 	
 		if(testData.size() > 0)
 		{
@@ -99,7 +112,7 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 	calculateZsAndActivations(input, zs, activations);
 	
 	//Backward pass
-	Matrix delta = costDerivative( activations.back(), output ).multiplyEntries( zs.back().applyFunction(sigmoidPrime) );
+	Matrix delta = costDerivative( activations.back(), output ).multiplyEntries( zs.back().applyFunction(SigmoidPrime()) );
 
 	outputBiases.back() = delta;
 	outputWeights.back() = delta * ( activations[ activations.size() - 2 ].transpose() );
@@ -108,7 +121,7 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 
 	for(v_int i = 2; i < this->sizes.size(); i++)
 	{
-		sp = (zs[zs.size() - i]).applyFunction(sigmoidPrime);
+		sp = (zs[zs.size() - i]).applyFunction(SigmoidPrime());
 		
 		delta = (this->weights[this->weights.size() - i + 1].transpose() * delta).multiplyEntries(sp);
 		outputBiases[outputBiases.size() - i] = delta;
@@ -135,16 +148,6 @@ void NeuralNetwork::partition(int start, int end, int size, vector <pair<int,int
 	}
 }
 
-double sigmoid(double value)
-{
-	return 1.0 / ( 1.0 + exp(-value) );
-}
-
-double sigmoidPrime(double value)
-{
-	return sigmoid(value) * (1.0 - sigmoid(value) );
-}
-
 Matrix NeuralNetwork::gaussianDistribution(unsigned rows, unsigned columns)
 {
 	Matrix matrix(rows, columns);
@@ -168,7 +171,7 @@ Matrix NeuralNetwork::costDerivative(const Matrix& outputActivations, const Matr
 	return outputActivations - output;
 }
 
-void NeuralNetwork::addInto(vector<Matrix>& matrices, const vector<Matrix>& delta) throw(invalid_argument)
+void NeuralNetwork::addInto(vector<Matrix>& matrices, const vector<Matrix>& delta)
 {
 	if(matrices.size() != delta.size())
 	{
@@ -191,6 +194,7 @@ void NeuralNetwork::updateMiniBatch(const NeuralNetworkData& trainingData, pair<
 	createBlankCopy(this->biases, nabla_b);
 	createBlankCopy(this->weights, nabla_w);
 
+
 	for(v_int i = limits.first; i < limits.second; i++)
 	{
 		this->backprop(trainingData[i].getInput(), trainingData[i].getOutput(), delta_nabla_w, delta_nabla_b);
@@ -203,6 +207,7 @@ void NeuralNetwork::updateMiniBatch(const NeuralNetworkData& trainingData, pair<
 	}
 
 	v_int limitRange = limits.second - limits.first;
+	
 	double learningScale = eta / limitRange;
 
 	for( m_int i = 0; i < this->weights.size(); i++) 
@@ -245,7 +250,7 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 		z = (this->weights[i] * activation) + this->biases[i];
 		zs.push_back(z);
 
-		activation = z.applyFunction(sigmoid);
+		activation = z.applyFunction(Sigmoid());
 		activations.push_back(activation);	
 	}
 }
@@ -260,11 +265,8 @@ void NeuralNetworkData::wrapData()
 	for(int i = 0; i < this->inputs.size(); i++)
 	{
 		this->wrappedData.push_back(Datum(this->inputs[i], this->outputs[i]));
-	}
-	
-	cout << "Finished Wrapping Data" << endl;
+	}	
 }
-
 
 
 unsigned int NeuralNetwork::getLargestRow(const Matrix& matrix)
@@ -316,4 +318,21 @@ ostream& operator<<(ostream& os, NeuralNetwork& network)
 	}
 
 	return os;
+}
+
+
+double sigmoid(double value)
+{
+	return 1.0 / ( 1.0 + exp(-value) );
+}
+
+double Sigmoid::operator()(double value)
+{
+	return sigmoid(value);
+}
+
+double SigmoidPrime::operator()(double value)
+{
+	
+	return sigmoid(value) * (1.0 - sigmoid(value) );
 }
