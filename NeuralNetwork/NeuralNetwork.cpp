@@ -43,7 +43,7 @@ Matrix NeuralNetwork::feedForward(const Matrix& input)
     for(int i = 0; i < this->biases.size(); i++)
 	{
 		result = ((this->weights[i] * result) + this->biases[i]);
-		result.applyFunctionInto(Sigmoid());
+		result.applyFunctionInto(this->sigmoid);
 	}
 
     return result;
@@ -110,9 +110,8 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 	vector<Matrix> activations;
 
 	calculateZsAndActivations(input, zs, activations);
-	
 	//Backward pass
-	Matrix delta = costDerivative( activations.back(), output ).multiplyEntries( zs.back().applyFunction(SigmoidPrime()) );
+	Matrix delta = costDerivative( activations.back(), output ).multiplyEntries( zs.back().applyFunction(this->sigmoidPrime) );
 
 	outputBiases.back() = delta;
 	outputWeights.back() = delta * ( activations[ activations.size() - 2 ].transpose() );
@@ -121,7 +120,7 @@ void NeuralNetwork::backprop(const Matrix& input, const Matrix& output, vector<M
 
 	for(v_int i = 2; i < this->sizes.size(); i++)
 	{
-		sp = (zs[zs.size() - i]).applyFunction(SigmoidPrime());
+		sp = (zs[zs.size() - i]).applyFunction(this->sigmoidPrime);
 		
 		delta = (this->weights[this->weights.size() - i + 1].transpose() * delta).multiplyEntries(sp);
 		outputBiases[outputBiases.size() - i] = delta;
@@ -250,7 +249,8 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 		z = (this->weights[i] * activation) + this->biases[i];
 		zs.push_back(z);
 
-		activation = z.applyFunction(Sigmoid());
+		activation = z.applyFunction(this->sigmoid);
+	
 		activations.push_back(activation);	
 	}
 }

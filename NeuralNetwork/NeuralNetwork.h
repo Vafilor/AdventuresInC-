@@ -20,6 +20,18 @@ typedef vector<int>::size_type v_int;
 typedef vector<Matrix>::size_type m_int;
 
 
+double sigmoid(double value);
+
+struct Sigmoid
+{
+	double operator()(double value);
+};
+
+struct SigmoidPrime
+{
+	double operator()(double value);
+};
+
 /*
  * Utility class to help interact with Neural Network Training Data.
  *
@@ -68,6 +80,8 @@ class NeuralNetwork
 		vector<int> sizes;
 		vector<Matrix> biases;
 		vector<Matrix> weights;
+		Sigmoid sigmoid;
+		SigmoidPrime sigmoidPrime;
 
 		/*	Matrix z;
 			Creates a rows x columns matrix where each entry is initialized randomly via a Gaussian distribution with mean 0 and variance 1. 
@@ -134,19 +148,6 @@ class NeuralNetwork
 		void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData );		
 
 		friend ostream& operator<<(ostream& os, NeuralNetwork& network);
-};
-
-
-double sigmoid(double value);
-
-struct Sigmoid
-{
-	double operator()(double value);
-};
-
-struct SigmoidPrime
-{
-	double operator()(double value);
 };
 
 #endif
