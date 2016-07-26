@@ -3,11 +3,9 @@
 
 #include <string>
 #include <stdexcept>
-
+#include <iostream>
 #ifndef MATRIX_H
 #define MATRIX_H
-
-//TODO indicate exceptions thrown - including for methods that call other methods
 
 using std::invalid_argument;
 
@@ -15,8 +13,12 @@ class Matrix
 {
     private:
         double** entries;
+        double*  vectorEntries;
         unsigned int rows;
         unsigned int columns;
+
+        bool isVector() const;
+        unsigned int vectorSize() const;
         
 		void freeEntriesMemory();
         
@@ -35,20 +37,45 @@ class Matrix
 				throw invalid_argument("rows or columns is 0");
 			}
 
-			this->entries = new double*[rows];
-
-			for(int i = 0; i < rows; i++) 
-			{
-				this->entries[i] = new double[columns]; 
-	
-				for(int j = 0; j < columns; j++) 
-				{
-					this->entries[i][j] = initializer(i, j);
-				}
-			}
-
 			this->rows = rows;
 			this->columns = columns;
+
+			if(rows == 1) 
+			{	
+				this->vectorEntries = new double[columns];
+				
+				for(int col = 0; col < columns; col++)
+				{
+					this->vectorEntries[col] = initializer(0, col);
+				}
+				
+				this->entries = nullptr;
+			} 
+			else if(columns == 1)
+			{
+				this->vectorEntries = new double[rows];
+				
+				for(int row = 0; row < rows; row++)
+				{
+					this->vectorEntries[row] = initializer(row, 0);
+				}
+				
+				this->entries = nullptr;
+			}
+			else 
+			{
+				this->entries = new double*[rows];
+				
+				for(int i = 0; i < rows; i++) 
+				{
+					this->entries[i] = new double[columns]; 
+	
+					for(int j = 0; j < columns; j++) 
+					{
+						this->entries[i][j] = initializer(i, j);
+					}
+				}
+			}
         }
         
         Matrix(const Matrix& that);
@@ -66,7 +93,7 @@ class Matrix
 		
 		//Returns a matrix where each entry is the negative of the current matrix entry
 		//i.e New(i,j) = -Old(i,j)
-		inline Matrix operator-() const;
+		Matrix operator-() const;
 
 		//Returns a transpose of the current matrix.
 		//i.e. New(i,j) = Old(j,i)
@@ -111,6 +138,16 @@ class Matrix
 		template<typename Function>		
 		void applyFunctionInto(Function function )
 		{
+			if(this->isVector())
+			{
+				for(int i = 0; i < this->vectorSize(); i++)
+				{
+					this->vectorEntries[i] = function(this->vectorEntries[i]);
+				}
+				
+				return;
+			}
+		
 			for(int i = 0; i < this->rows; i++)
 			{
 				for(int j = 0; j < this->columns; j++)

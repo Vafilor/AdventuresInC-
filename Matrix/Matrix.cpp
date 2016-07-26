@@ -7,6 +7,8 @@
 #include <string>
 using namespace std; //For debugging
 
+//Update Matrix to be smart enough to detect mx1 or 1xm
+
 Matrix::Matrix()
 {
 	this->entries = NULL;
@@ -14,28 +16,8 @@ Matrix::Matrix()
 	this->columns = 0;
 }
 
-Matrix::Matrix(unsigned int rows, unsigned int columns)
+Matrix::Matrix(unsigned int rows, unsigned int columns) : Matrix(rows, columns, [](unsigned int i, unsigned int j) { return 0.0; } )
 {
-	if(rows == 0 || columns == 0)
-	{
-		throw invalid_argument("rows or columns is 0");
-	}
-
-    double** data = new double*[rows];
-    
-    for(int i = 0; i < rows; i++) 
-    {
-        data[i] = new double[columns]; 
-        
-        for(int j = 0; j < columns; j++) 
-        {
-            data[i][j] = 0.0;
-        }
-    }
-    
-    this->entries = data;
-    this->rows = rows;
-    this->columns = columns;
 }
 
 Matrix::Matrix(const Matrix& that)
@@ -43,26 +25,40 @@ Matrix::Matrix(const Matrix& that)
 	this->rows = that.rows;
 	this->columns = that.columns;
 
-	this->entries = new double*[this->rows];
-	
-	for(int i = 0; i < this->rows; i++)
+	if(that.isVector()) 
 	{
-		this->entries[i] = new double[this->columns];
-
-		for(int j = 0; j < this->columns; j++)
+		this->vectorEntries = new double[ that.vectorSize() ];
+		
+		for(int i = 0; i < that.vectorSize(); i++)
 		{
-			this->entries[i][j] = that.entries[i][j];
+			this->vectorEntries[i] = that.vectorEntries[i];
+		}
+	} 
+	else 
+	{
+		this->entries = new double*[this->rows];
+	
+		for(int i = 0; i < this->rows; i++)
+		{
+			this->entries[i] = new double[this->columns];
+
+			for(int j = 0; j < this->columns; j++)
+			{
+				this->entries[i][j] = that.entries[i][j];
+			}
 		}
 	}
 }
 
 Matrix::Matrix(Matrix&& that)
 {
+	this->vectorEntries = that.vectorEntries;
 	this->entries = that.entries;
 	this->rows = that.rows;
 	this->columns = that.columns;
 	
 	that.entries = nullptr;
+	that.vectorEntries = nullptr;
 }
 
 Matrix::~Matrix()
@@ -72,19 +68,31 @@ Matrix::~Matrix()
 
 void Matrix::freeEntriesMemory()
 {
-	if(this->entries == nullptr)
+	if(this->isVector()) 
 	{
-		return;
+		if(this->vectorEntries == nullptr)
+		{
+			return;
+		}
+		
+		delete[] this->vectorEntries;
 	}
+	else 
+	{		
+		if(this->entries == nullptr)
+		{
+			return;
+		}
 
-	for(int i = 0; i < this->rows; i++) 
-    {	
-        delete[] this->entries[i];
-    }
+		for(int i = 0; i < this->rows; i++) 
+		{	
+			delete[] this->entries[i];
+		}
 
-	if(this->rows > 0 && this->columns > 0) 
-	{
-		delete[] this->entries;
+		if(this->rows > 0 && this->columns > 0) 
+		{
+			delete[] this->entries;
+		}
 	}
 }
 
@@ -95,9 +103,15 @@ Matrix Matrix::operator+(const Matrix& that) const
 		throw invalid_argument("Matrix summation not defined for matrices");
 	}
 
+	if(this->isVector()) 
+	{
+		return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return vectorEntries[i + j] + that.vectorEntries[i + j]; });
+	}
+
     return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return entries[i][j] + that.entries[i][j]; });
 }
 
+//TODO
 Matrix Matrix::operator*(const Matrix& that) const
 {
 	if(this->columns != that.rows)
@@ -109,22 +123,55 @@ Matrix Matrix::operator*(const Matrix& that) const
     int newColumns = that.columns;
 
     Matrix product( newRows, newColumns );
-    
-    double newValue = 0.0;
-    
-    for(int i = 0; i < newRows; i++) 
-    {
-        for(int j = 0; j < newColumns; j++)
-        {
-            for(int k = 0; k < this->getColumns(); k++)
-            {
-                newValue += this->entries[i][k] * that.entries[k][j];
-            }
-            
-            product.entries[i][j] = newValue;
-            
-            newValue = 0.0;
-        }    
+
+	if(this->isVector())
+	{
+		if(this->rows == 1)
+		{
+			for(int i = 0; i < this->vectorSize(); i++)
+			{
+				product.vectorEntries[0] += this->vectorEntries[i] * that.vectorEntries[i];
+			}
+		}
+		else 
+		{
+			for(int i = 0; i < newRows; i++)
+			{
+				for(int j = 0; j < newColumns; j++)
+				{
+					product.entries[i][j] = this->vectorEntries[i] * that.vectorEntries[j];
+				}
+			}
+		}
+	}
+	else if(that.isVector())
+	{
+		for(int i = 0; i < this->rows; i++)
+		{
+			for(int j = 0; j < this->columns; j++)
+			{
+				product.vectorEntries[i] += this->entries[i][j] * that.vectorEntries[j];
+			}
+		}
+	}
+	else 
+	{
+		double newValue = 0.0;
+	
+		for(int i = 0; i < newRows; i++) 
+		{
+			for(int j = 0; j < newColumns; j++)
+			{
+				for(int k = 0; k < this->getColumns(); k++)
+				{
+					newValue += this->entries[i][k] * that.entries[k][j];
+				}
+			
+				product.entries[i][j] = newValue;
+			
+				newValue = 0.0;
+			}    
+		}
     }
     
     return product;
@@ -137,15 +184,27 @@ Matrix& Matrix::operator=(const Matrix& that)
 	this->rows = that.rows;
 	this->columns = that.columns;
 
-	this->entries = new double*[this->rows];
-	
-	for(int i = 0; i < this->rows; i++)
+	if(that.isVector()) 
 	{
-		this->entries[i] = new double[this->columns];
-
-		for(int j = 0; j < this->columns; j++)
+		this->vectorEntries = new double[ that.vectorSize() ];
+		
+		for(int i = 0; i < that.vectorSize(); i++)
 		{
-			this->entries[i][j] = that.entries[i][j];	
+			this->vectorEntries[i] = that.vectorEntries[i];
+		}
+	} 
+	else
+	{
+		this->entries = new double*[this->rows];
+	
+		for(int i = 0; i < this->rows; i++)
+		{
+			this->entries[i] = new double[this->columns];
+
+			for(int j = 0; j < this->columns; j++)
+			{
+				this->entries[i][j] = that.entries[i][j];	
+			}
 		}
 	}
 	
@@ -157,16 +216,28 @@ Matrix& Matrix::operator=(Matrix&& that)
 	this->freeEntriesMemory();
 
 	this->entries = that.entries;
+	this->vectorEntries = that.vectorEntries;
 	this->rows = that.rows;
 	this->columns = that.columns;
 	
 	that.entries = nullptr;
+	that.vectorEntries = nullptr;
 	
 	return *this;
 }
 
 Matrix operator*(const Matrix& that, double scalar)
 {
+	if(that.isVector())
+	{
+		if(that.rows > 0)
+		{
+			return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.vectorEntries[i] * scalar; });
+		}
+		
+		return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.vectorEntries[j] * scalar; });
+	}
+	
 	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.entries[i][j] * scalar; });
 }
 
@@ -175,6 +246,19 @@ bool operator==(const Matrix & a, const Matrix& b)
 	if(a.rows != b.rows || a.columns != b.columns)
 	{
 		return false;
+	}
+
+	if(a.isVector())
+	{
+		for(int i = 0; i < a.vectorSize(); i++)
+		{
+			if(a.vectorEntries[i] != b.vectorEntries[i])
+			{
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	for(int i = 0; i < a.rows; i++)
@@ -193,6 +277,25 @@ bool operator==(const Matrix & a, const Matrix& b)
 
 std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
 {
+	if(matrix.isVector())
+	{
+		for(int i = 0; i < matrix.vectorSize(); i++)
+		{
+			output << matrix.vectorEntries[i];
+			
+			if(matrix.rows > 1)
+			{
+				output << "\n";
+			}
+			else
+			{
+				output << " ";
+			}
+		}
+		
+		return output;
+	}
+
 	for(int i = 0; i < matrix.rows; i++)
 	{
 		for(int j = 0; j < matrix.columns; j++)
@@ -202,16 +305,28 @@ std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
 
 		output << endl;
 	}
+	
 	return output;
 }
 
 const Matrix& Matrix::operator*=(double scalar)
 {
-	for(int i = 0; i < this->rows; i++)
+	if(this->isVector())
 	{
-		for(int j = 0; j < this->columns; j++)
+		for(int i = 0; i < this->vectorSize(); i++)
 		{
-			this->entries[i][j] *= scalar;
+			this->vectorEntries[i] *= scalar;
+		}
+		
+	}
+	else 
+	{
+		for(int i = 0; i < this->rows; i++)
+		{
+			for(int j = 0; j < this->columns; j++)
+			{
+				this->entries[i][j] *= scalar;
+			}
 		}
 	}
 	
@@ -225,11 +340,21 @@ const Matrix& Matrix::operator+=(const Matrix& that)
 		throw invalid_argument("Matrix += not defined with incoming matrix");
 	}
 
-	for(int i = 0; i < this->rows; i++)
+	if(this->isVector())
 	{
-		for(int j = 0; j < this->columns; j++)
+		for(int i = 0; i < this->vectorSize(); i++)
 		{
-			this->entries[i][j] += that.entries[i][j];
+			this->vectorEntries[i] += that.vectorEntries[i];
+		}
+	}
+	else
+	{
+		for(int i = 0; i < this->rows; i++)
+		{
+			for(int j = 0; j < this->columns; j++)
+			{
+				this->entries[i][j] += that.entries[i][j];
+			}
 		}
 	}
 	
@@ -238,6 +363,11 @@ const Matrix& Matrix::operator+=(const Matrix& that)
 
 Matrix Matrix::transpose()
 {
+	if(this->isVector())
+	{
+		return Matrix(this->columns, this->rows, [&](unsigned int i, unsigned int j) { return vectorEntries[i + j]; });
+	}
+
 	return Matrix(this->columns, this->rows, [&](unsigned int i, unsigned int j) { return entries[j][i]; });
 }
 
@@ -246,6 +376,11 @@ Matrix Matrix::multiplyEntries(const Matrix& that) const
 	if(this->rows != that.rows || this->columns != that.columns)
 	{
 		throw invalid_argument("multiplyEntry - matrices of incompatible size");
+	}
+
+	if(this->isVector())
+	{
+		return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return vectorEntries[i + j] * that.vectorEntries[i + j]; });
 	}
 
 	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return entries[i][j] * that.entries[i][j]; });
@@ -263,6 +398,11 @@ double& Matrix::operator()(unsigned int row, unsigned int column)
 		throw invalid_argument("Access out of bounds");
 	}
 
+	if(this->isVector())
+	{
+		return this->vectorEntries[row + column];
+	}
+
 	return this->entries[row][column];
 }
 
@@ -272,6 +412,12 @@ double Matrix::operator()(unsigned int row, unsigned int column) const
 	{
 		throw invalid_argument("Access out of bounds");
 	}
+
+	if(this->isVector())
+	{
+		return this->vectorEntries[row + column];
+	}
+
 
 	return this->entries[row][column];
 }
@@ -304,4 +450,19 @@ const Matrix& Matrix::operator-=(const Matrix& that)
 Matrix operator*(double scalar, const Matrix& that)
 {
 	return that * scalar;
+}
+
+bool Matrix::isVector() const
+{
+	return this->rows == 1 || this->columns == 1;
+}
+
+unsigned int Matrix::vectorSize() const
+{
+	if(this->rows > this->columns)
+	{
+		return this->rows;
+	}
+	
+	return this->columns;
 }
