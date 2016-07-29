@@ -3,7 +3,6 @@
 
 #include <string>
 #include <stdexcept>
-#include <iostream>
 #ifndef MATRIX_H
 #define MATRIX_H
 

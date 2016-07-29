@@ -13,6 +13,7 @@ const double TOLERANCE = 0.0001;
 void testAllEntriesZero(const Matrix& matrix);
 void testAllEntries(const Matrix& matrix, double value);
 
+//TODO allow 0x0 matrix - because you can technically get around it with a copy constructor
 
 BOOST_AUTO_TEST_CASE( constructor_test_default )
 {
@@ -194,22 +195,627 @@ BOOST_AUTO_TEST_CASE( operator_test_move_assignment )
 {
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_addition )
+BOOST_AUTO_TEST_CASE( operator_test_addition_exceptions )
 {
+	Matrix zero;
+	Matrix single(1,1);
+	Matrix row(1,3);
+	Matrix column(3,1);
+	Matrix square(3,3);
+	Matrix rectangle(3,4);
+	Matrix rectangle2(4,3);
+
+	//Check valid cases
+	//TODO add back
+	//zero + zero;
+	single + single;
+	row + row;
+	column + column;
+	square + square;
+	rectangle + rectangle;
+	rectangle2 + rectangle2;
+
+	//Check invalid cases
+	//TODO - do zero
+	
+	//Check different columns
+	BOOST_CHECK_THROW(
+		single + row,
+		std::invalid_argument
+	);
+	
+	BOOST_CHECK_THROW(
+		row + single,
+		std::invalid_argument
+	);
+	
+	//Check different rows
+	BOOST_CHECK_THROW(
+		single + column,
+		std::invalid_argument
+	);
+		
+	BOOST_CHECK_THROW(
+		column + single,
+		std::invalid_argument
+	);	
+	
+	//Check different rows and columns
+	BOOST_CHECK_THROW(
+		single + square,
+		std::invalid_argument
+	);	
+	
+	BOOST_CHECK_THROW(
+		square + single,
+		std::invalid_argument
+	);	
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_addition_into )
+BOOST_AUTO_TEST_CASE( operator_test_addition_single )
 {
+	//TODO 0x0
+	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
+	Matrix left(1,1);
+	left(0,0) = 1.0;
+	
+	Matrix right(1,1);
+	right(0,0) = 2.0;
+	
+	Matrix sum = left + right;
+	
+	BOOST_TEST(sum(0,0) == 3.0, tt::tolerance(TOLERANCE));
+	
+	Matrix sumSecond = right + left;
+	
+	BOOST_TEST(sumSecond(0,0) == 3.0, tt::tolerance(TOLERANCE));
+
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_subtraction )
+BOOST_AUTO_TEST_CASE( operator_test_addition_square )
 {
+	Matrix left(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	Matrix sum = left + right;
+	
+	for(int i = 0; i < sum.getRows(); i++)
+	{
+		for(int j = 0; j < sum.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	Matrix sumSecond = right + left;
+	
+	for(int i = 0; i < sumSecond.getRows(); i++)
+	{
+		for(int j = 0; j < sumSecond.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_subtraction_into )
+BOOST_AUTO_TEST_CASE( operator_test_addition_rectangle )
 {
+	Matrix left(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	Matrix sum = left + right;
+	
+	for(int i = 0; i < sum.getRows(); i++)
+	{
+		for(int j = 0; j < sum.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	Matrix sumSecond = right + left;
+	
+	for(int i = 0; i < sumSecond.getRows(); i++)
+	{
+		for(int j = 0; j < sumSecond.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
 }
 
+BOOST_AUTO_TEST_CASE( operator_test_addition_rectangle_2 )
+{
+	Matrix left(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	Matrix sum = left + right;
+	
+	for(int i = 0; i < sum.getRows(); i++)
+	{
+		for(int j = 0; j < sum.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	Matrix sumSecond = right + left;
+	
+	for(int i = 0; i < sumSecond.getRows(); i++)
+	{
+		for(int j = 0; j < sumSecond.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_addition_into_exceptions )
+{
+	Matrix zero;
+	Matrix single(1,1);
+	Matrix row(1,3);
+	Matrix column(3,1);
+	Matrix square(3,3);
+	Matrix rectangle(3,4);
+	Matrix rectangle2(4,3);
+
+	//Check valid cases
+	//TODO add back
+	//zero + zero;
+	single += single;
+	row += row;
+	column += column;
+	square += square;
+	rectangle += rectangle;
+	rectangle2 += rectangle2;
+
+	//Check invalid cases
+	//TODO - do zero
+	
+	//Check different columns
+	BOOST_CHECK_THROW(
+		single += row,
+		std::invalid_argument
+	);
+	
+	BOOST_CHECK_THROW(
+		row += single,
+		std::invalid_argument
+	);
+	
+	//Check different rows
+	BOOST_CHECK_THROW(
+		single += column,
+		std::invalid_argument
+	);
+		
+	BOOST_CHECK_THROW(
+		column += single,
+		std::invalid_argument
+	);	
+	
+	//Check different rows and columns
+	BOOST_CHECK_THROW(
+		single += square,
+		std::invalid_argument
+	);	
+	
+	BOOST_CHECK_THROW(
+		square += single,
+		std::invalid_argument
+	);	
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_addition_into_single )
+{
+	//TODO 0x0
+	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
+	Matrix left(1,1);
+	left(0,0) = 1.0;
+	
+	Matrix right(1,1);
+	right(0,0) = 2.0;
+	
+	left += right;
+	
+	BOOST_TEST(left(0,0) == 3.0, tt::tolerance(TOLERANCE));
+	
+	right += left;
+	
+	BOOST_TEST(right(0,0) == 5.0, tt::tolerance(TOLERANCE));
+
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_addition_into_square )
+{
+	Matrix left(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	left += right;
+	
+	for(int i = 0; i < left.getRows(); i++)
+	{
+		for(int j = 0; j < left.getColumns(); j++)
+		{
+			BOOST_TEST(left(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	right += left;
+	
+	for(int i = 0; i < right.getRows(); i++)
+	{
+		for(int j = 0; j < right.getColumns(); j++)
+		{
+			BOOST_TEST(right(i, j) == 3.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_addition_into_rectangle )
+{
+	Matrix left(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	left += right;
+	
+	for(int i = 0; i < left.getRows(); i++)
+	{
+		for(int j = 0; j < left.getColumns(); j++)
+		{
+			BOOST_TEST(left(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	right += left;
+	
+	for(int i = 0; i < right.getRows(); i++)
+	{
+		for(int j = 0; j < right.getColumns(); j++)
+		{
+			BOOST_TEST(right(i, j) == 3.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_addition_into_rectangle_2 )
+{
+	Matrix left(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	left += right;
+	
+	for(int i = 0; i < left.getRows(); i++)
+	{
+		for(int j = 0; j < left.getColumns(); j++)
+		{
+			BOOST_TEST(left(i, j) == 2.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	right += left;
+	
+	for(int i = 0; i < right.getRows(); i++)
+	{
+		for(int j = 0; j < right.getColumns(); j++)
+		{
+			BOOST_TEST(right(i, j) == 3.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_exceptions )
+{
+	Matrix zero;
+	Matrix single(1,1);
+	Matrix row(1,3);
+	Matrix column(3,1);
+	Matrix square(3,3);
+	Matrix rectangle(3,4);
+	Matrix rectangle2(4,3);
+
+	//Check valid cases
+	//TODO add back
+	//zero + zero;
+	single - single;
+	row - row;
+	column - column;
+	square - square;
+	rectangle - rectangle;
+	rectangle2 - rectangle2;
+
+	//Check invalid cases
+	//TODO - do zero
+	
+	//Check different columns
+	BOOST_CHECK_THROW(
+		single - row,
+		std::invalid_argument
+	);
+	
+	BOOST_CHECK_THROW(
+		row - single,
+		std::invalid_argument
+	);
+	
+	//Check different rows
+	BOOST_CHECK_THROW(
+		single - column,
+		std::invalid_argument
+	);
+		
+	BOOST_CHECK_THROW(
+		column - single,
+		std::invalid_argument
+	);	
+	
+	//Check different rows and columns
+	BOOST_CHECK_THROW(
+		single - square,
+		std::invalid_argument
+	);	
+	
+	BOOST_CHECK_THROW(
+		square - single,
+		std::invalid_argument
+	);	
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_single )
+{
+	//TODO 0x0
+	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
+	Matrix left(1,1);
+	left(0,0) = 1.0;
+	
+	Matrix right(1,1);
+	right(0,0) = 2.0;
+	
+	Matrix sum = left - right;
+	
+	BOOST_TEST(sum(0,0) == -1.0, tt::tolerance(TOLERANCE));
+	
+	Matrix sumSecond = right - left;
+	
+	BOOST_TEST(sumSecond(0,0) == 1.0, tt::tolerance(TOLERANCE));
+
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_square )
+{
+	Matrix left(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	Matrix sum = left - right;
+	
+	for(int i = 0; i < sum.getRows(); i++)
+	{
+		for(int j = 0; j < sum.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	Matrix sumSecond = right - left;
+	
+	for(int i = 0; i < sumSecond.getRows(); i++)
+	{
+		for(int j = 0; j < sumSecond.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_rectangle )
+{
+	Matrix left(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	Matrix sum = left - right;
+	
+	for(int i = 0; i < sum.getRows(); i++)
+	{
+		for(int j = 0; j < sum.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	Matrix sumSecond = right - left;
+	
+	for(int i = 0; i < sumSecond.getRows(); i++)
+	{
+		for(int j = 0; j < sumSecond.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 0.0*(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_rectangle_2 )
+{
+	Matrix left(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	Matrix sum = left - right;
+	
+	for(int i = 0; i < sum.getRows(); i++)
+	{
+		for(int j = 0; j < sum.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	Matrix sumSecond = right - left;
+	
+	for(int i = 0; i < sumSecond.getRows(); i++)
+	{
+		for(int j = 0; j < sumSecond.getColumns(); j++)
+		{
+			BOOST_TEST(sum(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_exceptions )
+{
+	Matrix zero;
+	Matrix single(1,1);
+	Matrix row(1,3);
+	Matrix column(3,1);
+	Matrix square(3,3);
+	Matrix rectangle(3,4);
+	Matrix rectangle2(4,3);
+
+	//Check valid cases
+	//TODO add back
+	//zero + zero;
+	single -= single;
+	row -= row;
+	column -= column;
+	square -= square;
+	rectangle -= rectangle;
+	rectangle2 -= rectangle2;
+
+	//Check invalid cases
+	//TODO - do zero
+	
+	//Check different columns
+	BOOST_CHECK_THROW(
+		single -= row,
+		std::invalid_argument
+	);
+	
+	BOOST_CHECK_THROW(
+		row -= single,
+		std::invalid_argument
+	);
+	
+	//Check different rows
+	BOOST_CHECK_THROW(
+		single -= column,
+		std::invalid_argument
+	);
+		
+	BOOST_CHECK_THROW(
+		column -= single,
+		std::invalid_argument
+	);	
+	
+	//Check different rows and columns
+	BOOST_CHECK_THROW(
+		single -= square,
+		std::invalid_argument
+	);	
+	
+	BOOST_CHECK_THROW(
+		square -= single,
+		std::invalid_argument
+	);	
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_single )
+{
+	//TODO 0x0
+	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
+	Matrix left(1,1);
+	left(0,0) = 1.0;
+	
+	Matrix right(1,1);
+	right(0,0) = 2.0;
+	
+	left -= right;
+	
+	BOOST_TEST(left(0,0) == -1.0, tt::tolerance(TOLERANCE));
+	
+	right -= left;
+	
+	BOOST_TEST(right(0,0) == 3.0, tt::tolerance(TOLERANCE));
+
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_square )
+{
+	Matrix left(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	left -= right;
+	
+	for(int i = 0; i < left.getRows(); i++)
+	{
+		for(int j = 0; j < left.getColumns(); j++)
+		{
+			BOOST_TEST(left(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	right -= left;
+	
+	for(int i = 0; i < right.getRows(); i++)
+	{
+		for(int j = 0; j < right.getColumns(); j++)
+		{
+			BOOST_TEST(right(i, j) == (double)(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_rectangle )
+{
+	Matrix left(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(3,4, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	left -= right;
+	
+	for(int i = 0; i < left.getRows(); i++)
+	{
+		for(int j = 0; j < left.getColumns(); j++)
+		{
+			BOOST_TEST(left(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	right -= left;
+	
+	for(int i = 0; i < right.getRows(); i++)
+	{
+		for(int j = 0; j < right.getColumns(); j++)
+		{
+			BOOST_TEST(right(i, j) == (double)(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_rectangle_2 )
+{
+	Matrix left(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	Matrix right(4,3, [](unsigned int row, unsigned int column){ return row + column; });
+	
+	left -= right;
+	
+	for(int i = 0; i < left.getRows(); i++)
+	{
+		for(int j = 0; j < left.getColumns(); j++)
+		{
+			BOOST_TEST(left(i, j) == 0.0, tt::tolerance(TOLERANCE));
+		}
+	}
+	
+	right -= left;
+	
+	for(int i = 0; i < right.getRows(); i++)
+	{
+		for(int j = 0; j < right.getColumns(); j++)
+		{
+			BOOST_TEST(right(i, j) == (double)(i+j), tt::tolerance(TOLERANCE));
+		}
+	}
+}
+
+//TODO
 BOOST_AUTO_TEST_CASE( operator_test_multiplication )
 {
 }
@@ -228,6 +834,8 @@ BOOST_AUTO_TEST_CASE( operator_test_negation )
 
 BOOST_AUTO_TEST_CASE( operator_test_getter )
 {
+	//TODO 0,0, 2,2, 0,1 1,0
+	//exceptions too
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_setter )

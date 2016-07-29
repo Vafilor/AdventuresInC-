@@ -8,6 +8,8 @@
 using namespace std; //For debugging
 
 //Update Matrix to be smart enough to detect mx1 or 1xm
+//TODO update matrix so we can detect 0x0
+// ->add method to detect 0x0?
 
 Matrix::Matrix()
 {
