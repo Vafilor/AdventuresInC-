@@ -29,21 +29,6 @@ BOOST_AUTO_TEST_CASE( constructor_test_dimensions )
 		std::invalid_argument
 	);
 
-	BOOST_CHECK_THROW(
-		Matrix(-1, 1),
-		std::invalid_argument
-	);
-
-	BOOST_CHECK_THROW(
-		Matrix(-1, -1),
-		std::invalid_argument
-	);
-	
-	BOOST_CHECK_THROW(
-		Matrix(-1, -1),
-		std::invalid_argument
-	);
-
 	Matrix single(1,1);
 	
 	BOOST_TEST(single.getRows() == 1);
@@ -85,27 +70,6 @@ BOOST_AUTO_TEST_CASE( constructor_test_functor )
 {
 	BOOST_CHECK_THROW(
 		Matrix zero(0, 0, [](unsigned int row, unsigned int column) {
-			return 0.0;
-		}),
-		std::invalid_argument
-	);
-	
-	BOOST_CHECK_THROW(
-		Matrix negativeRow(-1, 1, [](unsigned int row, unsigned int column) {
-			return 0.0;
-		}),
-		std::invalid_argument
-	);
-
-	BOOST_CHECK_THROW(
-		Matrix negativeColumn(-1, -1, [](unsigned int row, unsigned int column) {
-			return 0.0;
-		}),
-		std::invalid_argument
-	);
-	
-	BOOST_CHECK_THROW(
-		Matrix negtiveBoth(-1, -1, [](unsigned int row, unsigned int column) {
 			return 0.0;
 		}),
 		std::invalid_argument
