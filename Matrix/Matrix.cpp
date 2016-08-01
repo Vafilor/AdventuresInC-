@@ -232,7 +232,7 @@ Matrix operator*(const Matrix& that, double scalar)
 {
 	if(that.isVector())
 	{
-		if(that.rows > 0)
+		if(that.rows > 1)
 		{
 			return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.vectorEntries[i] * scalar; });
 		}

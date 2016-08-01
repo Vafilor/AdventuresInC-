@@ -820,16 +820,212 @@ BOOST_AUTO_TEST_CASE( operator_test_multiplication )
 {
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar )
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_single )
 {
+	//TODO test 0x0
+	//TODO text 1x1
+	
+	Matrix single(1,1);
+	single(0,0) = 5.0;
+	
+	Matrix result = single * 5.0;
+	
+	BOOST_TEST(result(0,0) == 25.0, tt::tolerance(TOLERANCE));
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into )
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_row )
 {
+	Matrix row(1,3);
+	row(0,0) = 1.0;
+	row(0,1) = 2.0;
+	row(0,2) = 3.0;
+	
+	Matrix result = row * -2.0;
+	
+	BOOST_TEST(result(0,0) == -2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(0,1) == -4.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(0,2) == -6.0, tt::tolerance(TOLERANCE));
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_negation )
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_column )
 {
+	Matrix column(3,1);
+	column(0,0) =  0.0;
+	column(1,0) = -1.0;
+	column(2,0) = -2.0;
+	
+	Matrix result = column * -5.0;
+	
+	BOOST_TEST(result(0,0) == 0.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(1,0) == 5.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(2,0) == 10.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_square )
+{
+	Matrix square(2,2, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	Matrix result = square * 3.0;
+	
+	testAllEntries( result, 6.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_rectangle_1 )
+{
+	Matrix rectangle(2,3, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	Matrix result = rectangle * 3.0;
+	
+	testAllEntries( result, 6.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_rectangle_2 )
+{
+	Matrix rectangle(3,2, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	Matrix result = rectangle * 3.0;
+	
+	testAllEntries( result, 6.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_single )
+{
+	//TODO test 0x0
+	//TODO text 1x1
+	
+	Matrix single(1,1);
+	single(0,0) = 5.0;
+	
+	single *= 5.0;
+	
+	BOOST_TEST(single(0,0) == 25.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_row )
+{
+	Matrix row(1,3);
+	row(0,0) = 1.0;
+	row(0,1) = 2.0;
+	row(0,2) = 3.0;
+	
+	row *= -2.0;
+	
+	BOOST_TEST(row(0,0) == -2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(row(0,1) == -4.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(row(0,2) == -6.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_column )
+{
+	Matrix column(3,1);
+	column(0,0) =  0.0;
+	column(1,0) = -1.0;
+	column(2,0) = -2.0;
+	
+	column *= -5.0;
+	
+	BOOST_TEST(column(0,0) == 0.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(column(1,0) == 5.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(column(2,0) == 10.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_square )
+{
+	Matrix square(2,2, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	square *= 3.0;
+	
+	testAllEntries( square, 6.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_rectangle_1 )
+{
+	Matrix rectangle(2,3, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	rectangle *= 3.0;
+	
+	testAllEntries( rectangle, 6.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_rectangle_2 )
+{
+	Matrix rectangle(3,2, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	rectangle *= 3.0;
+	
+	testAllEntries( rectangle, 6.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_negation_single )
+{
+	//TODO 0x0
+	Matrix single(1,1);
+	single(0,0) = 5.0;
+	
+	BOOST_TEST(-single(0,0) == -5.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_negation_row )
+{
+	Matrix row(1,3);
+	row(0,0) = 1.0;
+	row(0,1) = 2.0;
+	row(0,2) = 3.0;
+	
+	BOOST_TEST(-row(0,0) == -1.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(-row(0,1) == -2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(-row(0,2) == -3.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_negation_column )
+{
+	Matrix column(3,1);
+	column(0,0) =  0.0;
+	column(1,0) = -1.0;
+	column(2,0) = -2.0;
+	
+	BOOST_TEST(-column(0,0) == 0.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(-column(1,0) == 1.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(-column(2,0) == 2.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_negation_square )
+{
+	Matrix square(2,2, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	testAllEntries( -square, -2.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_negation_rectangle )
+{
+	Matrix rectangle(2,3, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	testAllEntries( -rectangle, -2.0 );
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_negation_rectangle2 )
+{
+	Matrix rectangle(3,2, [](unsigned int row, unsigned int column){
+		return -2.0;
+	});
+	
+	testAllEntries( -rectangle, 2.0 );
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_getter )
@@ -845,7 +1041,6 @@ BOOST_AUTO_TEST_CASE( operator_test_setter )
 BOOST_AUTO_TEST_CASE( transpose )
 {
 }
-
 
 
 void testAllEntriesZero(const Matrix& matrix)
