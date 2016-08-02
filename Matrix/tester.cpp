@@ -1038,11 +1038,46 @@ BOOST_AUTO_TEST_CASE( operator_test_setter )
 {
 }
 
-BOOST_AUTO_TEST_CASE( transpose )
+BOOST_AUTO_TEST_CASE( transpose_single )
 {
+	//TODO 0x0
+	Matrix single(1,1);
+	single(0,0) = 5.0;
+
+	Matrix transpose = single.transpose();
+
+	BOOST_TEST(transpose(0, 0) == 5.0, tt::tolerance(TOLERANCE));
 }
 
+BOOST_AUTO_TEST_CASE( transpose_row )
+{
+	Matrix row(1,3);
+	row(0,0) = 1.0;
+	row(0,1) = 2.0;
+	row(0,2) = 3.0;
 
+	Matrix transpose = row.transpose();
+
+	BOOST_TEST(transpose(0, 0) == 1.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(transpose(1, 0) == 2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(transpose(2, 0) == 3.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( transpose_column )
+{
+	Matrix column(3,1);
+	column(0,0) = 1.0;
+	column(1,0) = 2.0;
+	column(2,0) = 3.0;
+
+	Matrix transpose = column.transpose();
+
+	BOOST_TEST(transpose(0, 0) == 1.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(transpose(0, 1) == 2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(transpose(0, 2) == 3.0, tt::tolerance(TOLERANCE));
+}
+
+//TODO tranpose square, rectangles
 void testAllEntriesZero(const Matrix& matrix)
 {
 	testAllEntries(matrix, 0.0);
