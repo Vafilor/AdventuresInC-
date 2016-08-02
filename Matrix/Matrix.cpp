@@ -27,6 +27,12 @@ Matrix::Matrix(const Matrix& that)
 	this->rows = that.rows;
 	this->columns = that.columns;
 
+	if(that.isZeroMatrix())
+	{
+		this->vectorEntries = nullptr;
+		this->entries = nullptr;
+	}
+
 	if(that.isVector()) 
 	{
 		this->vectorEntries = new double[ that.vectorSize() ];
@@ -70,6 +76,11 @@ Matrix::~Matrix()
 
 void Matrix::freeEntriesMemory()
 {
+	if(this->isZeroMatrix())
+	{
+		return;
+	}
+
 	if(this->isVector()) 
 	{
 		if(this->vectorEntries == nullptr)
@@ -105,6 +116,11 @@ Matrix Matrix::operator+(const Matrix& that) const
 		throw invalid_argument("Matrix summation not defined for matrices");
 	}
 
+	if(this->isZeroMatrix())
+	{
+		return Matrix();
+	}
+
 	if(this->isVector()) 
 	{
 		return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return vectorEntries[i + j] + that.vectorEntries[i + j]; });
@@ -120,6 +136,11 @@ Matrix Matrix::operator*(const Matrix& that) const
 	{
 		throw invalid_argument("Matrix Multiplication not defined for incoming matrix");
 	}	
+
+	if(this->isZeroMatrix()) 
+	{
+		return Matrix();
+	}
 
     int newRows = this->getRows();
     int newColumns = that.columns;
@@ -186,6 +207,12 @@ Matrix& Matrix::operator=(const Matrix& that)
 	this->rows = that.rows;
 	this->columns = that.columns;
 
+	if(that.isZeroMatrix())
+	{
+		this->entries = nullptr;
+		this->vectorEntries = nullptr;
+	}
+
 	if(that.isVector()) 
 	{
 		this->vectorEntries = new double[ that.vectorSize() ];
@@ -230,6 +257,11 @@ Matrix& Matrix::operator=(Matrix&& that)
 
 Matrix operator*(const Matrix& that, double scalar)
 {
+	if(that.isZeroMatrix())
+	{
+		return Matrix();
+	}
+
 	if(that.isVector())
 	{
 		if(that.rows > 1)
@@ -248,6 +280,11 @@ bool operator==(const Matrix & a, const Matrix& b)
 	if(a.rows != b.rows || a.columns != b.columns)
 	{
 		return false;
+	}
+
+	if(a.isZeroMatrix())
+	{
+		return true;
 	}
 
 	if(a.isVector())
@@ -279,6 +316,12 @@ bool operator==(const Matrix & a, const Matrix& b)
 
 std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
 {
+	if(matrix.isZeroMatrix())
+	{
+		output << "[]";
+		return output;
+	}
+
 	if(matrix.isVector())
 	{
 		for(int i = 0; i < matrix.vectorSize(); i++)
@@ -313,6 +356,11 @@ std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
 
 const Matrix& Matrix::operator*=(double scalar)
 {
+	if(this->isZeroMatrix())
+	{
+		return *this;
+	}
+
 	if(this->isVector())
 	{
 		for(int i = 0; i < this->vectorSize(); i++)
@@ -342,6 +390,11 @@ const Matrix& Matrix::operator+=(const Matrix& that)
 		throw invalid_argument("Matrix += not defined with incoming matrix");
 	}
 
+	if(this->isZeroMatrix())
+	{
+		return *this;
+	}
+
 	if(this->isVector())
 	{
 		for(int i = 0; i < this->vectorSize(); i++)
@@ -365,6 +418,11 @@ const Matrix& Matrix::operator+=(const Matrix& that)
 
 Matrix Matrix::transpose()
 {
+	if(this->isZeroMatrix())
+	{
+		return Matrix();
+	}
+
 	if(this->isVector())
 	{
 		return Matrix(this->columns, this->rows, [&](unsigned int i, unsigned int j) { return vectorEntries[i + j]; });
@@ -378,6 +436,11 @@ Matrix Matrix::multiplyEntries(const Matrix& that) const
 	if(this->rows != that.rows || this->columns != that.columns)
 	{
 		throw invalid_argument("multiplyEntry - matrices of incompatible size");
+	}
+
+	if(that.isZeroMatrix())
+	{
+		return Matrix();
 	}
 
 	if(this->isVector())
@@ -467,4 +530,10 @@ unsigned int Matrix::vectorSize() const
 	}
 	
 	return this->columns;
+}
+
+bool Matrix::isZeroMatrix() const
+{
+	//You can't have a Nx0 or 0xN matrix, so either condition below suffices.
+	return this->rows == 0 || this->columns == 0;
 }

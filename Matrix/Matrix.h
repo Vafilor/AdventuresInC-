@@ -18,6 +18,7 @@ class Matrix
 
         bool isVector() const;
         unsigned int vectorSize() const;
+        bool isZeroMatrix() const;
         
 		void freeEntriesMemory();
         
@@ -31,13 +32,21 @@ class Matrix
         template<typename Function>
         Matrix(unsigned int rows, unsigned int columns, Function initializer) 
         {
-			if(rows == 0 || columns == 0)
-			{
-				throw invalid_argument("rows or columns is 0");
-			}
-
-			this->rows = rows;
+        	this->rows = rows;
 			this->columns = columns;
+        
+        	if( rows == 0 && columns == 0) 
+        	{
+        		this->entries = nullptr;
+        		this->vectorEntries = nullptr;
+        		
+        		return;
+        	} 
+        	else if( rows == 0 || columns == 0)
+        	{
+        		throw invalid_argument("Can't have a Nx0 or 0xN matrix");
+        	}
+    
 
 			if(rows == 1) 
 			{	
