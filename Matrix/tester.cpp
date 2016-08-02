@@ -815,9 +815,171 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_rectangle_2 )
 	}
 }
 
-//TODO
-BOOST_AUTO_TEST_CASE( operator_test_multiplication )
+//TODO test sizes
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_exceptions )
 {
+	Matrix single(1,1);
+	Matrix column(3, 1);
+	Matrix square(2,2);
+	
+	//Column Mismatch
+	BOOST_CHECK_THROW(
+		single * column,
+		std::invalid_argument
+	);
+	
+	BOOST_CHECK_THROW(
+		column * square,
+		std::invalid_argument
+	);	
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_sizes )
+{
+	Matrix zero;
+	Matrix single(1,1);
+	Matrix row(1,3);
+	Matrix column(3, 1);
+	
+	//TODO test resulting multiplication sizes
+	//zero * zero
+	//single * single
+	//row column
+	//column row
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_zero )
+{
+	//TODO
+	//TODO test exceptions throw for multiplication
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_single )
+{
+	Matrix first(1,1);
+	first(0,0) = 5.0;
+	
+	Matrix second(1,1);
+	second(0,0) = 3.0;
+	
+	Matrix result = first * second;
+	
+	BOOST_TEST(result(0,0) == 15.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_row )
+{
+	Matrix row(1,3);
+	row(0,0) = 1.0;
+	row(0,1) = 2.0;
+	row(0,2) = 3.0;
+	
+	Matrix column(3,1);
+	column(0,0) = 1.0;
+	column(1,0) = 2.0;
+	column(2,0) = 3.0;
+
+	Matrix result = row * column;
+	
+	BOOST_TEST(result(0,0) == 14.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_column )
+{
+	Matrix column(2,1);
+	column(0,0) = 1.0;
+	column(1,0) = 2.0;
+	
+	Matrix row(1,2);
+	row(0,0) = 1.0;
+	row(0,1) = 2.0;
+	
+	Matrix result = column * row;
+	
+	BOOST_TEST(result(0,0) == 1.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(0,1) == 2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(1,0) == 2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(1,1) == 4.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_square )
+{
+	Matrix square1(2,2);
+	square1(0,0) = 1.0;
+	square1(0,1) = 2.0;
+	square1(1,0) = 3.0;
+	square1(1,1) = 4.0;
+	
+	Matrix square2(2,2);
+	square2(0,0) =  1.0;
+	square2(0,1) = -1.0;
+	square2(1,0) =  1.0;
+	square2(1,1) =  2.0;
+	
+	Matrix result = square1 * square2;
+	
+	BOOST_TEST(result(0,0) == 3.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(0,1) == 3.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(1,0) == 7.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result(1,1) == 5.0, tt::tolerance(TOLERANCE));
+	
+	Matrix result2 = square2 * square1;
+	
+	BOOST_TEST(result2(0,0) == -2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result2(0,1) == -2.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result2(1,0) ==  7.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(result2(1,1) == 10.0, tt::tolerance(TOLERANCE));	
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_rectangle_1 )
+{
+	Matrix rectangle(2,3);
+	rectangle(0,0) = 0.0;
+	rectangle(0,1) = 1.0;
+	rectangle(0,2) = 2.0;
+	rectangle(1,0) = 1.0;
+	rectangle(1,1) = 2.0;
+	rectangle(1,2) = 0.0;
+	
+	Matrix rectangle2(3,3);
+	rectangle2(0,0) = -8.0;
+	rectangle2(0,1) = -7.0;
+	rectangle2(0,2) = -6.0;
+	rectangle2(1,0) = -5.0;
+	rectangle2(1,1) = -4.0;
+	rectangle2(1,2) = -3.0;	
+	rectangle2(2,0) = -2.0;	
+	rectangle2(2,1) = -1.0;	
+	rectangle2(2,2) =  0.0;	
+	
+	Matrix result = rectangle * rectangle2;
+	BOOST_TEST(result(0,0) ==  -9.0, tt::tolerance(TOLERANCE));	
+	BOOST_TEST(result(0,1) ==  -6.0, tt::tolerance(TOLERANCE));	
+	BOOST_TEST(result(0,2) == -3.0, tt::tolerance(TOLERANCE));	
+	BOOST_TEST(result(1,0) == -18.0, tt::tolerance(TOLERANCE));	
+	BOOST_TEST(result(1,1) == -15.0, tt::tolerance(TOLERANCE));	
+	BOOST_TEST(result(1,2) == -12.0, tt::tolerance(TOLERANCE));		
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_rectangle_2 )
+{
+	Matrix rectangle(3,2);
+	rectangle(0,0) = 1.0;
+	rectangle(0,1) = 1.0;
+	rectangle(1,0) = 1.0;
+	rectangle(1,1) = 1.0;
+	rectangle(2,0) = 1.0;
+	rectangle(2,1) = 1.0;
+	
+	Matrix rectangle2(2,2);
+	rectangle2(0,0) = 1.0;
+	rectangle2(0,1) = 1.0;
+	rectangle2(1,0) = 1.0;
+	rectangle2(1,1) = 1.0;
+	
+	Matrix result = rectangle * rectangle2;
+
+	testAllEntries(result, 2.0);
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_single )
@@ -1075,6 +1237,57 @@ BOOST_AUTO_TEST_CASE( transpose_column )
 	BOOST_TEST(transpose(0, 0) == 1.0, tt::tolerance(TOLERANCE));
 	BOOST_TEST(transpose(0, 1) == 2.0, tt::tolerance(TOLERANCE));
 	BOOST_TEST(transpose(0, 2) == 3.0, tt::tolerance(TOLERANCE));
+}
+
+BOOST_AUTO_TEST_CASE( transpose_square )
+{
+	Matrix square(2,2, [](unsigned int row, unsigned int column){
+		return (double)(row + 2.0*column);
+	});
+
+	Matrix transpose = square.transpose();
+
+	for(int row = 0; row < transpose.getRows(); row++)
+	{
+		for(int column = 0; column < transpose.getColumns(); column++)
+		{
+			BOOST_TEST(transpose(row, column) == (double)(2.0 * row + column), tt::tolerance(TOLERANCE));			
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( transpose_rectangle )
+{
+	Matrix rectangle(3,2, [](unsigned int row, unsigned int column){
+		return (double)(row + 2.0*column);
+	});
+
+	Matrix transpose = rectangle.transpose();
+
+	for(int row = 0; row < transpose.getRows(); row++)
+	{
+		for(int column = 0; column < transpose.getColumns(); column++)
+		{
+			BOOST_TEST(transpose(row, column) == (double)(2.0 * row + column), tt::tolerance(TOLERANCE));			
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( transpose_rectangle_2 )
+{
+	Matrix rectangle(2,3, [](unsigned int row, unsigned int column){
+		return (double)(2.0 * row + column);
+	});
+
+	Matrix transpose = rectangle.transpose();
+
+	for(int row = 0; row < transpose.getRows(); row++)
+	{
+		for(int column = 0; column < transpose.getColumns(); column++)
+		{
+			BOOST_TEST(transpose(row, column) == (double)(row + 2.0 * column), tt::tolerance(TOLERANCE));			
+		}
+	}
 }
 
 //TODO tranpose square, rectangles
