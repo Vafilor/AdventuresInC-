@@ -847,8 +847,8 @@ BOOST_AUTO_TEST_CASE( operator_test_multiplication_sizes )
 	Matrix column(3, 1);
 	
 	Matrix zeroResult = zero * zero;
-	BOOST_TEST(singleResult.getRows() == 0);
-	BOOST_TEST(singleResult.getColumns() == 0);	
+	BOOST_TEST(zeroResult.getRows() == 0);
+	BOOST_TEST(zeroResult.getColumns() == 0);	
 	
 	Matrix singleResult = single * single;
 	BOOST_TEST(singleResult.getRows() == 1);
