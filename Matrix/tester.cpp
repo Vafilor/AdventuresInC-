@@ -1,9 +1,6 @@
 #define BOOST_TEST_MODULE NeuralNetworkTest
 #include <boost/test/included/unit_test.hpp>
 #include <stdexcept>
-
-//This is so we can test private methods
-#define private public
 #include "Matrix.h"
 
 namespace utf = boost::unit_test;
@@ -13,8 +10,6 @@ const double TOLERANCE = 0.0001;
 
 void testAllEntriesZero(const Matrix& matrix);
 void testAllEntries(const Matrix& matrix, double value);
-
-//TODO test private methods of matrix
 
 BOOST_AUTO_TEST_CASE( constructor_test_default )
 {
