@@ -13,8 +13,6 @@ const double TOLERANCE = 0.0001;
 void testAllEntriesZero(const Matrix& matrix);
 void testAllEntries(const Matrix& matrix, double value);
 
-//TODO allow 0x0 matrix - because you can technically get around it with a copy constructor
-
 BOOST_AUTO_TEST_CASE( constructor_test_default )
 {
 	Matrix matrix;
@@ -25,10 +23,7 @@ BOOST_AUTO_TEST_CASE( constructor_test_default )
 
 BOOST_AUTO_TEST_CASE( constructor_test_dimensions )
 {
-	BOOST_CHECK_THROW(
-		Matrix(0, 0),
-		std::invalid_argument
-	);
+	Matrix zero; 
 
 	Matrix single(1,1);
 	
@@ -69,12 +64,9 @@ BOOST_AUTO_TEST_CASE( constructor_test_dimensions )
 
 BOOST_AUTO_TEST_CASE( constructor_test_functor )
 {
-	BOOST_CHECK_THROW(
-		Matrix zero(0, 0, [](unsigned int row, unsigned int column) {
-			return 0.0;
-		}),
-		std::invalid_argument
-	);
+	Matrix zero(0, 0, [](unsigned int row, unsigned int column) {
+		return 0.0;
+	});
 	
 	Matrix single(1, 1, [](unsigned int row, unsigned int column) {
 		return 5.0;
@@ -206,8 +198,10 @@ BOOST_AUTO_TEST_CASE( operator_test_addition_exceptions )
 	Matrix rectangle2(4,3);
 
 	//Check valid cases
-	//TODO add back
-	//zero + zero;
+	
+	//Note: We do not test 0x0 matrix addition as it is invalid to access a row.
+	//As long as it doesn't throw exception to add them, that's alright.
+	zero + zero;
 	single + single;
 	row + row;
 	column + column;
@@ -216,7 +210,13 @@ BOOST_AUTO_TEST_CASE( operator_test_addition_exceptions )
 	rectangle2 + rectangle2;
 
 	//Check invalid cases
-	//TODO - do zero
+	
+	//Check Zero
+	BOOST_CHECK_THROW(
+		zero + single,
+		std::invalid_argument
+	);
+
 	
 	//Check different columns
 	BOOST_CHECK_THROW(
@@ -254,8 +254,6 @@ BOOST_AUTO_TEST_CASE( operator_test_addition_exceptions )
 
 BOOST_AUTO_TEST_CASE( operator_test_addition_single )
 {
-	//TODO 0x0
-	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
 	Matrix left(1,1);
 	left(0,0) = 1.0;
 	
@@ -361,8 +359,10 @@ BOOST_AUTO_TEST_CASE( operator_test_addition_into_exceptions )
 	Matrix rectangle2(4,3);
 
 	//Check valid cases
-	//TODO add back
-	//zero + zero;
+	
+	//We do not test 0x0 matrix addition into as it is invalid to access a row.
+	//As long as it doesn't throw exception, that's alright.
+	zero += zero;
 	single += single;
 	row += row;
 	column += column;
@@ -371,7 +371,12 @@ BOOST_AUTO_TEST_CASE( operator_test_addition_into_exceptions )
 	rectangle2 += rectangle2;
 
 	//Check invalid cases
-	//TODO - do zero
+
+	//Check zero
+	BOOST_CHECK_THROW(
+		zero += single,
+		std::invalid_argument
+	);
 	
 	//Check different columns
 	BOOST_CHECK_THROW(
@@ -409,8 +414,6 @@ BOOST_AUTO_TEST_CASE( operator_test_addition_into_exceptions )
 
 BOOST_AUTO_TEST_CASE( operator_test_addition_into_single )
 {
-	//TODO 0x0
-	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
 	Matrix left(1,1);
 	left(0,0) = 1.0;
 	
@@ -516,8 +519,7 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_exceptions )
 	Matrix rectangle2(4,3);
 
 	//Check valid cases
-	//TODO add back
-	//zero + zero;
+	zero - zero;
 	single - single;
 	row - row;
 	column - column;
@@ -526,7 +528,12 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_exceptions )
 	rectangle2 - rectangle2;
 
 	//Check invalid cases
-	//TODO - do zero
+
+	//Check zero
+	BOOST_CHECK_THROW(
+		zero - single,
+		std::invalid_argument
+	);
 	
 	//Check different columns
 	BOOST_CHECK_THROW(
@@ -564,8 +571,6 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_exceptions )
 
 BOOST_AUTO_TEST_CASE( operator_test_subtraction_single )
 {
-	//TODO 0x0
-	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
 	Matrix left(1,1);
 	left(0,0) = 1.0;
 	
@@ -671,8 +676,7 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_exceptions )
 	Matrix rectangle2(4,3);
 
 	//Check valid cases
-	//TODO add back
-	//zero + zero;
+	zero -= zero;
 	single -= single;
 	row -= row;
 	column -= column;
@@ -681,7 +685,12 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_exceptions )
 	rectangle2 -= rectangle2;
 
 	//Check invalid cases
-	//TODO - do zero
+
+	//Check zero
+	BOOST_CHECK_THROW(
+		zero -= single,
+		std::invalid_argument
+	);
 	
 	//Check different columns
 	BOOST_CHECK_THROW(
@@ -719,8 +728,6 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_exceptions )
 
 BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_single )
 {
-	//TODO 0x0
-	//TODO make sure exceptions are thrown for invalid size matrices - its own test method
 	Matrix left(1,1);
 	left(0,0) = 1.0;
 	
@@ -734,7 +741,6 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_single )
 	right -= left;
 	
 	BOOST_TEST(right(0,0) == 3.0, tt::tolerance(TOLERANCE));
-
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_square )
@@ -815,7 +821,6 @@ BOOST_AUTO_TEST_CASE( operator_test_subtraction_into_rectangle_2 )
 	}
 }
 
-//TODO test sizes
 BOOST_AUTO_TEST_CASE( operator_test_multiplication_exceptions )
 {
 	Matrix single(1,1);
@@ -841,17 +846,25 @@ BOOST_AUTO_TEST_CASE( operator_test_multiplication_sizes )
 	Matrix row(1,3);
 	Matrix column(3, 1);
 	
-	//TODO test resulting multiplication sizes
-	//zero * zero
-	//single * single
-	//row column
-	//column row
-}
+	Matrix zeroResult = zero * zero;
+	BOOST_TEST(singleResult.getRows() == 0);
+	BOOST_TEST(singleResult.getColumns() == 0);	
+	
+	Matrix singleResult = single * single;
+	BOOST_TEST(singleResult.getRows() == 1);
+	BOOST_TEST(singleResult.getColumns() == 1);	
 
-BOOST_AUTO_TEST_CASE( operator_test_multiplication_zero )
-{
-	//TODO
-	//TODO test exceptions throw for multiplication
+	Matrix rowColumnResult = row * column;
+	BOOST_TEST(rowColumnResult.getRows() == 1);
+	BOOST_TEST(rowColumnResult.getColumns() == 1);	
+	
+	Matrix columnRowResult = column * row;
+	BOOST_TEST(columnRowResult.getRows() == 3);
+	BOOST_TEST(columnRowResult.getColumns() == 3);	
+	
+	Matrix singleRowResult = single * row;
+	BOOST_TEST(singleRowResult.getRows() == 1);
+	BOOST_TEST(singleRowResult.getColumns() == 3);		
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_multiplication_single )
@@ -982,11 +995,19 @@ BOOST_AUTO_TEST_CASE( operator_test_multiplication_rectangle_2 )
 	testAllEntries(result, 2.0);
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_single )
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_zero )
 {
-	//TODO test 0x0
-	//TODO text 1x1
+	Matrix zero;
 	
+	//You can't access zero matrix entries. 
+	//Just need to make sure it doesn't throw exception.
+	
+	//TODO make sure exception IS thrown when trying to access or set something in a zero matrix.
+	zero * 2.0;	
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_single )
+{	
 	Matrix single(1,1);
 	single(0,0) = 5.0;
 	
