@@ -1,10 +1,11 @@
 #define BOOST_TEST_MODULE NeuralNetworkTest
+#include <boost/test/included/unit_test.hpp>
+#include <stdexcept>
+
 //This is so we can test private methods
 #define private public
-
-#include <boost/test/included/unit_test.hpp>
 #include "Matrix.h"
-#include <stdexcept>
+
 namespace utf = boost::unit_test;
 namespace tt = boost::test_tools;
 
@@ -12,6 +13,8 @@ const double TOLERANCE = 0.0001;
 
 void testAllEntriesZero(const Matrix& matrix);
 void testAllEntries(const Matrix& matrix, double value);
+
+//TODO test private methods of matrix
 
 BOOST_AUTO_TEST_CASE( constructor_test_default )
 {
@@ -1002,7 +1005,6 @@ BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_zero )
 	//You can't access zero matrix entries. 
 	//Just need to make sure it doesn't throw exception.
 	
-	//TODO make sure exception IS thrown when trying to access or set something in a zero matrix.
 	zero * 2.0;	
 }
 
@@ -1077,11 +1079,16 @@ BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_rectangle_2 )
 	testAllEntries( result, 6.0 );
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_single )
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_zero )
 {
-	//TODO test 0x0
-	//TODO text 1x1
+	Matrix zero;
 	
+	//Here we're making sure no exception is thrown.
+	zero *= 0;
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_single )
+{	
 	Matrix single(1,1);
 	single(0,0) = 5.0;
 	
@@ -1151,9 +1158,16 @@ BOOST_AUTO_TEST_CASE( operator_test_multiplication_scalar_into_rectangle_2 )
 	testAllEntries( rectangle, 6.0 );
 }
 
+BOOST_AUTO_TEST_CASE( operator_test_negation_zero)
+{
+	Matrix zero;
+	
+	//Here we're making sure no exception is thrown.
+	-zero;
+}
+
 BOOST_AUTO_TEST_CASE( operator_test_negation_single )
 {
-	//TODO 0x0
 	Matrix single(1,1);
 	single(0,0) = 5.0;
 	
@@ -1212,18 +1226,114 @@ BOOST_AUTO_TEST_CASE( operator_test_negation_rectangle2 )
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_getter )
-{
-	//TODO 0,0, 2,2, 0,1 1,0
-	//exceptions too
+{	
+	//Invalid to access zero matrix entries.
+	Matrix zero;
+	
+	BOOST_CHECK_THROW(
+		zero(0,0),
+		std::invalid_argument
+	);
+	
+	Matrix matrix(2,3, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	
+	//Test legal access
+	BOOST_TEST(matrix(1,2) == 2.0, tt::tolerance(TOLERANCE));
+	
+	//Invalid Row
+	BOOST_CHECK_THROW(
+		double result = matrix(2,0),
+		std::invalid_argument
+	);
+
+	//Invalid Row
+	BOOST_CHECK_THROW(
+		double result = matrix(3,0),
+		std::invalid_argument
+	);
+	
+	//Invalid column
+	BOOST_CHECK_THROW(
+		double result = matrix(0,3),
+		std::invalid_argument
+	);
+
+	//Invalid column
+	BOOST_CHECK_THROW(
+		double result = matrix(0,4),
+		std::invalid_argument
+	);
+	
+	//Invalid Row/Column
+	BOOST_CHECK_THROW(
+		double result = matrix(4,5),
+		std::invalid_argument
+	);
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_setter )
 {
+	//Invalid to set zero matrix entries.
+	Matrix zero;
+
+	BOOST_CHECK_THROW(
+		zero(0,0) = 1.0,
+		std::invalid_argument
+	);
+	
+	Matrix matrix(2,3, [](unsigned int row, unsigned int column){
+		return 2.0;
+	});
+	
+	matrix(1,2) = 5.0;
+	
+	//Check if setter worked
+	BOOST_TEST(matrix(1,2) == 5.0, tt::tolerance(TOLERANCE));
+	
+	//Invalid Row
+	BOOST_CHECK_THROW(
+		matrix(2,0) = 1.0,
+		std::invalid_argument
+	);
+
+	//Invalid Row
+	BOOST_CHECK_THROW(
+		matrix(3,0) = 5.0,
+		std::invalid_argument
+	);
+	
+	//Invalid column
+	BOOST_CHECK_THROW(
+		matrix(0,3) = 6.0,
+		std::invalid_argument
+	);
+
+	//Invalid column
+	BOOST_CHECK_THROW(
+		matrix(0,4) = 2.0,
+		std::invalid_argument
+	);
+	
+	//Invalid Row/Column
+	BOOST_CHECK_THROW(
+		matrix(4,5) = -5.0,
+		std::invalid_argument
+	);
+}
+
+BOOST_AUTO_TEST_CASE( transpose_zero )
+{
+	Matrix zero;
+	
+	//Here we're making sure no exception is thrown.
+	Matrix transpose = zero.transpose();
 }
 
 BOOST_AUTO_TEST_CASE( transpose_single )
 {
-	//TODO 0x0
 	Matrix single(1,1);
 	single(0,0) = 5.0;
 
@@ -1311,7 +1421,6 @@ BOOST_AUTO_TEST_CASE( transpose_rectangle_2 )
 	}
 }
 
-//TODO tranpose square, rectangles
 void testAllEntriesZero(const Matrix& matrix)
 {
 	testAllEntries(matrix, 0.0);
