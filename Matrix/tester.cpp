@@ -10,7 +10,10 @@ const double TOLERANCE = 0.0001;
 
 void testAllEntriesZero(const Matrix& matrix);
 void testAllEntries(const Matrix& matrix, double value);
+//For move constructor tests
+Matrix createMatrix(unsigned int rows, unsigned int columns);
 
+//TODO separate these out, this file is huge!
 BOOST_AUTO_TEST_CASE( constructor_test_default )
 {
 	Matrix matrix;
@@ -145,36 +148,207 @@ BOOST_AUTO_TEST_CASE( constructor_test_functor )
 	}
 }
 
-BOOST_AUTO_TEST_CASE( constructor_test_copy )
+BOOST_AUTO_TEST_CASE( equality_zero ) 
 {
-	//Test 0
-	//Test Singleton
+	Matrix zero;
+	Matrix zero2;
 	
-	//Test row
+	BOOST_TEST(zero == zero2);
+	
+}
+
+BOOST_AUTO_TEST_CASE( equality_single )
+{ 
+	Matrix single(1,1);
+	single(0,0) = 5.0;
+	
+	Matrix single2(1,1);
+	single2(0,0) = 5.0;
+	
+	BOOST_TEST(single == single2);
+	
+	single2(0,0) = -1.0;
+	
+	BOOST_TEST(!(single == single2));
+}
+
+BOOST_AUTO_TEST_CASE( equality_row )
+{ 
+	Matrix row(1,3);
+	row(0,0) = 1.0;
+	row(0,1) = 2.0;
+	row(0,2) = 3.0;
+
+	Matrix row2(1,3);
+	row2(0,0) = 1.0;
+	row2(0,1) = 2.0;
+	row2(0,2) = 3.0;
+	
+	BOOST_TEST(row == row2);
+	
+	row2(0,0) = -1.0;
+	BOOST_TEST(!(row == row2));
+}
+
+BOOST_AUTO_TEST_CASE( equality_column)
+{ 
+	Matrix column(3,1);
+	column(0,0) = 1.0;
+	column(1,0) = 2.0;
+	column(2,0) = 3.0;
+
+	Matrix column2(3,1);
+	column2(0,0) = 1.0;
+	column2(1,0) = 2.0;
+	column2(2,0) = 3.0;
+	
+	BOOST_TEST(column == column2);
+	
+	column2(0,0) = -1.0;
+	BOOST_TEST(!(column == column2));
+}
+
+BOOST_AUTO_TEST_CASE( equality_square)
+{ 
+	Matrix square(2,2);
+	square(0,0) = 1.0;
+	square(0,1) = 2.0;
+	square(1,0) = 3.0;	
+	square(1,1) = 4.0;
+
+	Matrix square2(2,2);
+	square2(0,0) = 1.0;
+	square2(0,1) = 2.0;
+	square2(1,0) = 3.0;	
+	square2(1,1) = 4.0;
+	
+	BOOST_TEST(square == square2);
+	
+	square2(0,0) = -1.0;
+	BOOST_TEST(!(square == square2));
+}
+
+BOOST_AUTO_TEST_CASE( equality_rectangle)
+{ 
+	Matrix rectangle(2,3);
+	rectangle(0,0) = 1.0;
+	rectangle(0,1) = 2.0;
+	rectangle(0,2) = 3.0;	
+	rectangle(1,0) = 4.0;	
+	rectangle(1,1) = 5.0;
+	rectangle(1,2) = 6.0;
+
+	Matrix rectangle2(2,3);
+	rectangle2(0,0) = 1.0;
+	rectangle2(0,1) = 2.0;
+	rectangle2(0,2) = 3.0;	
+	rectangle2(1,0) = 4.0;	
+	rectangle2(1,1) = 5.0;
+	rectangle2(1,2) = 6.0;
+	
+	BOOST_TEST(rectangle == rectangle2);
+	
+	rectangle2(0,0) = -1.0;
+	BOOST_TEST(!(rectangle == rectangle2));
+}
+
+BOOST_AUTO_TEST_CASE( equality_rectangle_2)
+{ 
+	Matrix rectangle(3,2);
+	rectangle(0,0) = 1.0;
+	rectangle(0,1) = 2.0;
+	rectangle(1,0) = 3.0;	
+	rectangle(1,1) = 4.0;	
+	rectangle(2,0) = 5.0;
+	rectangle(2,1) = 6.0;
+
+	Matrix rectangle2(3,2);
+	rectangle2(0,0) = 1.0;
+	rectangle2(0,1) = 2.0;
+	rectangle2(1,0) = 3.0;	
+	rectangle2(1,1) = 4.0;	
+	rectangle2(2,0) = 5.0;
+	rectangle2(2,1) = 6.0;
+	
+	BOOST_TEST(rectangle == rectangle2);
+	
+	rectangle2(0,0) = -1.0;
+	BOOST_TEST(!(rectangle == rectangle2));
+}
+
+BOOST_AUTO_TEST_CASE( constructor_test_copy )
+{	
+	//Here we're making sure we don't get any exceptions for zero matrix
+	Matrix zero;
+	Matrix zeroCopy(zero);
+	
+	Matrix single(1,1);
+	single(0,0) = 5.0;
+	
+	Matrix singleCopy(single);
+	BOOST_TEST(single == singleCopy);
 	
 	Matrix row(1, 3);
-	
 	row(0,0) = 1.0;
 	row(0,1) = 2.0;
 	row(0,2) = 3.0;
 	
 	Matrix rowCopy(row);
 	
-	BOOST_TEST(rowCopy.getRows() == 1);
-	BOOST_TEST(rowCopy.getColumns() == 3);
-	BOOST_TEST(rowCopy(0,0) == 1.0, tt::tolerance(TOLERANCE));
-	BOOST_TEST(rowCopy(0,1) == 2.0, tt::tolerance(TOLERANCE));
-	BOOST_TEST(rowCopy(0,2) == 3.0, tt::tolerance(TOLERANCE));
+	BOOST_TEST(row == rowCopy);
 	
+	Matrix column(3,1);
+	column(0,0) = 1.0;
+	column(1,0) = 2.0;
+	column(2,0) = 3.0;
+
+	Matrix columnCopy(column);
+
+	BOOST_TEST(column == columnCopy);
 	
-	//Test column
-	//Test square
-	//Text Rectangles
+	Matrix square(2,2);
+	square(0,0) = 1.0;
+	square(0,1) = 2.0;
+	square(1,0) = 3.0;	
+	square(1,1) = 4.0;
+	
+	Matrix squareCopy(square);
+	
+	BOOST_TEST(square == squareCopy);
+
+	Matrix rectangle(2,3);
+	rectangle(0,0) = 1.0;
+	rectangle(0,1) = 2.0;
+	rectangle(0,2) = 3.0;	
+	rectangle(1,0) = 4.0;	
+	rectangle(1,1) = 5.0;
+	rectangle(1,2) = 6.0;
+
+	Matrix rectangleCopy(rectangle);
+	
+	BOOST_TEST(rectangle == rectangleCopy);
+	
+	Matrix rectangle2(3,2);
+	rectangle2(0,0) = 1.0;
+	rectangle2(0,1) = 2.0;
+	rectangle2(1,0) = 3.0;	
+	rectangle2(1,1) = 4.0;	
+	rectangle2(2,0) = 5.0;
+	rectangle2(2,1) = 6.0;
+
+	Matrix rectangle2Copy(rectangle2);
+
+	BOOST_TEST(rectangle2 == rectangle2Copy);
 }
+
 
 BOOST_AUTO_TEST_CASE( constructor_test_move )
 {
-
+	Matrix zero;
+	
+	Matrix zeroCopy = createMatrix(0,0);
+	
+	BOOST_TEST(zero == zeroCopy);
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_assignment )
@@ -1430,4 +1604,9 @@ void testAllEntries(const Matrix& matrix, double value)
 			BOOST_TEST(matrix(i,j) == value, tt::tolerance(TOLERANCE));
 		}
 	}	
+}
+
+Matrix createMatrix(unsigned int rows, unsigned int columns)
+{
+	return Matrix(rows, columns);
 }
