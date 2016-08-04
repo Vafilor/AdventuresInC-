@@ -2,16 +2,17 @@
 #include <boost/test/included/unit_test.hpp>
 #include <stdexcept>
 #include "Matrix.h"
+#include <vector>
 
 namespace utf = boost::unit_test;
 namespace tt = boost::test_tools;
+
+using std::vector;
 
 const double TOLERANCE = 0.0001;
 
 void testAllEntriesZero(const Matrix& matrix);
 void testAllEntries(const Matrix& matrix, double value);
-//For move constructor tests
-Matrix createMatrix(unsigned int rows, unsigned int columns);
 
 //TODO separate these out, this file is huge!
 BOOST_AUTO_TEST_CASE( constructor_test_default )
@@ -342,21 +343,294 @@ BOOST_AUTO_TEST_CASE( constructor_test_copy )
 }
 
 
-BOOST_AUTO_TEST_CASE( constructor_test_move )
+BOOST_AUTO_TEST_CASE( constructor_test_move_zero )
 {
 	Matrix zero;
 	
-	Matrix zeroCopy = createMatrix(0,0);
+	Matrix single(1,1, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
 	
-	BOOST_TEST(zero == zeroCopy);
+	Matrix row(1,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix column(3,1, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});	
+	
+	Matrix square(2,2, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix rectangle(3,4, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix rectangle2(4,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+
+	vector<Matrix> matrices;
+	matrices.reserve(7);
+	
+	matrices.push_back(zero);
+	matrices.push_back(single);
+	matrices.push_back(row);
+	matrices.push_back(column);
+	matrices.push_back(square);
+	matrices.push_back(rectangle);
+	matrices.push_back(rectangle2);
+	
+	BOOST_TEST(matrices[0] == zero);
+	BOOST_TEST(matrices[1] == single);
+	BOOST_TEST(matrices[2] == row);
+	BOOST_TEST(matrices[3] == column);
+	BOOST_TEST(matrices[4] == square);
+	BOOST_TEST(matrices[5] == rectangle);
+	BOOST_TEST(matrices[6] == rectangle2);
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_assignment )
+BOOST_AUTO_TEST_CASE( operator_test_assignment_zero )
 {
+	Matrix zero;
+	
+	Matrix zeroTest(3,3);
+	zeroTest = zero;
+	
+	BOOST_TEST(zero == zeroTest);
+	
+	Matrix square(2,2, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	zero = square;
+	
+	BOOST_TEST(zero == square);
 }
 
-BOOST_AUTO_TEST_CASE( operator_test_move_assignment )
+BOOST_AUTO_TEST_CASE( operator_test_assignment_single )
 {
+	Matrix single(1,1);
+	
+	Matrix singleTest(3,3);
+	singleTest = single;
+	
+	BOOST_TEST(single == singleTest);
+	
+	Matrix square(3,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	single = square;
+	
+	BOOST_TEST(single == square);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_assignment_row )
+{
+	Matrix row(1,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix rowCopy(3,1);
+	
+	rowCopy = row;
+	
+	BOOST_TEST(row == rowCopy);
+	
+	Matrix column(3,1,[](unsigned int row, unsigned int column){
+		return (double)(row+column);
+	});
+	
+	row = column;
+	
+	BOOST_TEST(row == column);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_assignment_column )
+{
+	Matrix column(3,1, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix columnCopy(1,3);
+	
+	columnCopy = column;
+	
+	BOOST_TEST(column == columnCopy);
+	
+	Matrix row(1,3,[](unsigned int row, unsigned int column){
+		return (double)(row+column);
+	});
+	
+	column = row;
+	
+	BOOST_TEST(row == column);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_assignment_square )
+{
+	Matrix square(2,2, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix squareCopy;
+	
+	squareCopy = square;
+	
+	BOOST_TEST(square == squareCopy);
+	
+	Matrix rectangle(3,4, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	square = rectangle;
+	
+	BOOST_TEST(square == rectangle);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_assignment_rectangle )
+{
+	Matrix rectangle(3,4, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix rectangleCopy;
+	
+	rectangleCopy = rectangle;
+	
+	BOOST_TEST(rectangle == rectangleCopy);
+	
+	Matrix rectangle2(4,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	rectangle = rectangle2;
+	
+	BOOST_TEST(rectangle == rectangle2);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_assignment_rectangle2 )
+{
+	Matrix rectangle(4,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	Matrix rectangleCopy;
+	
+	rectangleCopy = rectangle;
+	
+	BOOST_TEST(rectangle == rectangleCopy);
+	
+	Matrix rectangle2(3,4, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	});
+	
+	rectangle = rectangle2;
+	
+	BOOST_TEST(rectangle == rectangle2);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_move_assignment_zero )
+{
+	Matrix zero;
+	Matrix zeroMove;
+		
+	zeroMove = Matrix();
+	
+	BOOST_TEST(zero == zeroMove);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_move_assignment_single )
+{
+	Matrix single(1,1);
+	single(0,0) = 5.0;
+	
+	Matrix singleMove(1,1);
+		
+	singleMove = Matrix(1,1, [](unsigned int row, unsigned int column) {
+		return 5.0;
+	});
+	
+	BOOST_TEST(single == singleMove);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_move_assignment_row )
+{
+	Matrix row(1,3);
+	row(0,0) = 0.0;
+	row(0,1) = 1.0;
+	row(0,2) = 2.0;
+	
+	Matrix rowMove(1,3);
+		
+	rowMove = Matrix(1,3, [](unsigned int row, unsigned int column) {
+		return (double)column;
+	});
+	
+	BOOST_TEST(row == rowMove);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_move_assignment_column )
+{
+	Matrix column(3,1);
+	column(0,0) = 0.0;
+	column(1,0) = 1.0;
+	column(2,0) = 2.0;
+	
+	Matrix columnMove(3,1);
+		
+	columnMove = Matrix(3,1, [](unsigned int row, unsigned int column) {
+		return (double)row;
+	});
+	
+	BOOST_TEST(column == columnMove);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_move_assignment_square )
+{
+	Matrix square(3,3, [](unsigned int row, unsigned int column) {
+		return (double)(row + column);
+	});
+	
+	Matrix squareMove(3,3);
+		
+	squareMove = Matrix(3,3, [](unsigned int row, unsigned int column) {
+		return (double)(row + column);
+	});
+	
+	BOOST_TEST(square == squareMove);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_move_assignment_rectangle )
+{
+	Matrix rectangle(3,4, [](unsigned int row, unsigned int column) {
+		return (double)(row + column);
+	});
+	
+	Matrix rectangleMove(3,4);
+		
+	rectangleMove = Matrix(3,4, [](unsigned int row, unsigned int column) {
+		return (double)(row + column);
+	});
+	
+	BOOST_TEST(rectangle == rectangleMove);
+}
+
+BOOST_AUTO_TEST_CASE( operator_test_move_assignment_rectangle_2 )
+{
+	Matrix rectangle(4,3, [](unsigned int row, unsigned int column) {
+		return (double)(row + column);
+	});
+	
+	Matrix rectangleMove(4,3);
+		
+	rectangleMove = Matrix(4,3, [](unsigned int row, unsigned int column) {
+		return (double)(row + column);
+	});
+	
+	BOOST_TEST(rectangle == rectangleMove);
 }
 
 BOOST_AUTO_TEST_CASE( operator_test_addition_exceptions )
@@ -1604,9 +1878,4 @@ void testAllEntries(const Matrix& matrix, double value)
 			BOOST_TEST(matrix(i,j) == value, tt::tolerance(TOLERANCE));
 		}
 	}	
-}
-
-Matrix createMatrix(unsigned int rows, unsigned int columns)
-{
-	return Matrix(rows, columns);
 }
