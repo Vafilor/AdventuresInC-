@@ -13,7 +13,7 @@ using namespace std; //For debugging
 
 Matrix::Matrix()
 {
-	this->entries = NULL;
+	this->entries = nullptr;
 	this->rows = 0;
 	this->columns = 0;
 }
@@ -101,11 +101,8 @@ void Matrix::freeEntriesMemory()
 		{	
 			delete[] this->entries[i];
 		}
-
-		if(this->rows > 0 && this->columns > 0) 
-		{
-			delete[] this->entries;
-		}
+	
+		delete[] this->entries;			
 	}
 }
 
@@ -211,9 +208,8 @@ Matrix& Matrix::operator=(const Matrix& that)
 	{
 		this->entries = nullptr;
 		this->vectorEntries = nullptr;
-	}
-
-	if(that.isVector()) 
+	} 
+	else if(that.isVector()) 
 	{
 		this->vectorEntries = new double[ that.vectorSize() ];
 		
