@@ -8,7 +8,6 @@ namespace utf = boost::unit_test;
 namespace tt = boost::test_tools;
 
 using std::vector;
-
 const double TOLERANCE = 0.0001;
 
 void testAllEntriesZero(const Matrix& matrix);
@@ -152,7 +151,7 @@ BOOST_AUTO_TEST_CASE( constructor_test_functor )
 BOOST_AUTO_TEST_CASE( equality_zero ) 
 {
 	Matrix zero;
-	Matrix zero2;
+	Matrix zero2(0,0);
 	
 	BOOST_TEST(zero == zero2);
 	
