@@ -7,15 +7,8 @@
 #include <string>
 using namespace std; //For debugging
 
-//Update Matrix to be smart enough to detect mx1 or 1xm
-//TODO update matrix so we can detect 0x0
-// ->add method to detect 0x0?
-
-Matrix::Matrix()
+Matrix::Matrix() : Matrix(0,0)
 {
-	this->entries = nullptr;
-	this->rows = 0;
-	this->columns = 0;
 }
 
 Matrix::Matrix(unsigned int rows, unsigned int columns) : Matrix(rows, columns, [](unsigned int i, unsigned int j) { return 0.0; } )
@@ -29,43 +22,26 @@ Matrix::Matrix(const Matrix& that)
 
 	if(that.isZeroMatrix())
 	{
-		this->vectorEntries = nullptr;
 		this->entries = nullptr;
 	}
-	else if(that.isVector()) 
-	{
-		this->vectorEntries = new double[ that.vectorSize() ];
-		
-		for(int i = 0; i < that.vectorSize(); i++)
-		{
-			this->vectorEntries[i] = that.vectorEntries[i];
-		}
-	} 
 	else 
 	{
-		this->entries = new double*[this->rows];
-	
-		for(int i = 0; i < this->rows; i++)
+		this->entries = new double[ that.length() ];
+		
+		for(int i = 0; i < that.length(); i++)
 		{
-			this->entries[i] = new double[this->columns];
-
-			for(int j = 0; j < this->columns; j++)
-			{
-				this->entries[i][j] = that.entries[i][j];
-			}
+			this->entries[i] = that.entries[i];
 		}
 	}
 }
 
 Matrix::Matrix(Matrix&& that)
 {
-	this->vectorEntries = that.vectorEntries;
-	this->entries = that.entries;
 	this->rows = that.rows;
 	this->columns = that.columns;
-	
+	this->entries = that.entries;
+
 	that.entries = nullptr;
-	that.vectorEntries = nullptr;
 }
 
 Matrix::~Matrix()
@@ -80,29 +56,7 @@ void Matrix::freeEntriesMemory()
 		return;
 	}
 
-	if(this->isVector()) 
-	{
-		if(this->vectorEntries == nullptr)
-		{
-			return;
-		}
-		
-		delete[] this->vectorEntries;
-	}
-	else 
-	{		
-		if(this->entries == nullptr)
-		{
-			return;
-		}
-
-		for(int i = 0; i < this->rows; i++) 
-		{	
-			delete[] this->entries[i];
-		}
-	
-		delete[] this->entries;			
-	}
+	delete[] this->entries;
 }
 
 Matrix Matrix::operator+(const Matrix& that) const
@@ -117,12 +71,14 @@ Matrix Matrix::operator+(const Matrix& that) const
 		return Matrix();
 	}
 
+	//TODO - additional is actually simpler - add each entry by entry. 
+	//Need to see if can simply do this.
 	if(this->isVector()) 
 	{
 		return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return vectorEntries[i + j] + that.vectorEntries[i + j]; });
 	}
 
-    return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return entries[i][j] + that.entries[i][j]; });
+    return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return entries(i,j) + that.entries(i,j); });
 }
 
 //TODO
@@ -147,9 +103,9 @@ Matrix Matrix::operator*(const Matrix& that) const
 	{
 		if(this->rows == 1)
 		{
-			for(int i = 0; i < this->vectorSize(); i++)
+			for(int i = 0; i < this->length(); i++)
 			{
-				product.vectorEntries[0] += this->vectorEntries[i] * that.vectorEntries[i];
+				product.entries[0] += this->entries[i] * that.entries[i];
 			}
 		}
 		else 
@@ -158,7 +114,7 @@ Matrix Matrix::operator*(const Matrix& that) const
 			{
 				for(int j = 0; j < newColumns; j++)
 				{
-					product.entries[i][j] = this->vectorEntries[i] * that.vectorEntries[j];
+					product(i,j) = this->entries[i] * that.entries[j];
 				}
 			}
 		}
@@ -169,7 +125,7 @@ Matrix Matrix::operator*(const Matrix& that) const
 		{
 			for(int j = 0; j < this->columns; j++)
 			{
-				product.vectorEntries[i] += this->entries[i][j] * that.vectorEntries[j];
+				product.entries[i] += (*this)(i,j) * that.entries[j];
 			}
 		}
 	}
@@ -183,10 +139,10 @@ Matrix Matrix::operator*(const Matrix& that) const
 			{
 				for(int k = 0; k < this->getColumns(); k++)
 				{
-					newValue += this->entries[i][k] * that.entries[k][j];
+					newValue += (*this)(i,k) * that(k,j);
 				}
 			
-				product.entries[i][j] = newValue;
+				product(i,j) = newValue;
 			
 				newValue = 0.0;
 			}    
@@ -206,31 +162,17 @@ Matrix& Matrix::operator=(const Matrix& that)
 	if(that.isZeroMatrix())
 	{
 		this->entries = nullptr;
-		this->vectorEntries = nullptr;
-	} 
-	else if(that.isVector()) 
-	{
-		this->vectorEntries = new double[ that.vectorSize() ];
-		
-		for(int i = 0; i < that.vectorSize(); i++)
-		{
-			this->vectorEntries[i] = that.vectorEntries[i];
-		}
 	} 
 	else
 	{
-		this->entries = new double*[this->rows];
-	
-		for(int i = 0; i < this->rows; i++)
+		this->entries = new double[ that.length() ];
+		
+		for(int i = 0; i < that.length(); i++)
 		{
-			this->entries[i] = new double[this->columns];
-
-			for(int j = 0; j < this->columns; j++)
-			{
-				this->entries[i][j] = that.entries[i][j];	
-			}
+			this->entries[i] = that.entries[i];
 		}
-	}
+	} 
+
 	
 	return *this;
 }
@@ -240,12 +182,10 @@ Matrix& Matrix::operator=(Matrix&& that)
 	this->freeEntriesMemory();
 
 	this->entries = that.entries;
-	this->vectorEntries = that.vectorEntries;
 	this->rows = that.rows;
 	this->columns = that.columns;
 	
 	that.entries = nullptr;
-	that.vectorEntries = nullptr;
 	
 	return *this;
 }
@@ -261,13 +201,14 @@ Matrix operator*(const Matrix& that, double scalar)
 	{
 		if(that.rows > 1)
 		{
-			return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.vectorEntries[i] * scalar; });
+			return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.entries[i] * scalar; });
 		}
 		
-		return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.vectorEntries[j] * scalar; });
+		return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.entries[j] * scalar; });
 	}
 	
-	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.entries[i][j] * scalar; });
+	//TODO - can this be simplified?
+	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that(i,j) * scalar; });
 }
 
 bool operator==(const Matrix & a, const Matrix& b)
@@ -282,27 +223,11 @@ bool operator==(const Matrix & a, const Matrix& b)
 		return true;
 	}
 
-	if(a.isVector())
+	for(int i = 0; i < a.length(); i++)
 	{
-		for(int i = 0; i < a.vectorSize(); i++)
+		if(a.entries[i] != b.entries[i])
 		{
-			if(a.vectorEntries[i] != b.vectorEntries[i])
-			{
-				return false;
-			}
-		}
-		
-		return true;
-	}
-
-	for(int i = 0; i < a.rows; i++)
-	{
-		for(int j = 0; j < a.columns; j++)
-		{
-			if(a.entries[i][j] != b.entries[i][j])
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 
@@ -311,6 +236,7 @@ bool operator==(const Matrix & a, const Matrix& b)
 
 std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
 {
+//TODO
 	if(matrix.isZeroMatrix())
 	{
 		output << "[]";
@@ -506,14 +432,10 @@ bool Matrix::isVector() const
 	return this->rows == 1 || this->columns == 1;
 }
 
-unsigned int Matrix::vectorSize() const
+unsigned int Matrix::length() const
 {
-	if(this->rows > this->columns)
-	{
-		return this->rows;
-	}
-	
-	return this->columns;
+	//TODO potential performance issue?
+	return this->rows * this->columns;
 }
 
 bool Matrix::isZeroMatrix() const

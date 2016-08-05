@@ -16,7 +16,7 @@ class Matrix
         unsigned int columns;
 
         bool isVector() const;
-        unsigned int vectorSize() const;
+        unsigned int length() const;
         bool isZeroMatrix() const;
         
 		void freeEntriesMemory();
@@ -35,6 +35,7 @@ class Matrix
         	if( rows == 0 && columns == 0) 
         	{
         		this->entries = nullptr;        		
+        		
         		return;
         	} 
         	else if( rows == 0 || columns == 0)
