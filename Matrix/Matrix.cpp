@@ -32,8 +32,7 @@ Matrix::Matrix(const Matrix& that)
 		this->vectorEntries = nullptr;
 		this->entries = nullptr;
 	}
-
-	if(that.isVector()) 
+	else if(that.isVector()) 
 	{
 		this->vectorEntries = new double[ that.vectorSize() ];
 		
