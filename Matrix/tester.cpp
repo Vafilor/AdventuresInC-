@@ -373,14 +373,38 @@ BOOST_AUTO_TEST_CASE( constructor_test_move_zero )
 	vector<Matrix> matrices;
 	matrices.reserve(7);
 	
-	matrices.push_back(zero);
-	matrices.push_back(single);
-	matrices.push_back(row);
-	matrices.push_back(column);
-	matrices.push_back(square);
-	matrices.push_back(rectangle);
-	matrices.push_back(rectangle2);
+	matrices.push_back(Matrix());
 	
+	//Single
+	matrices.push_back(	Matrix(1,1, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	}));
+	
+	//Row
+	matrices.push_back(	Matrix(1,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	}));
+	
+	//Column
+	matrices.push_back(	Matrix(3,1, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	}));
+	
+	//Square
+	matrices.push_back(	Matrix(2,2, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	}));
+
+	//Rectangle
+	matrices.push_back(	Matrix(3,4, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	}));
+
+	//Rectangle2	
+	matrices.push_back(	Matrix(4,3, [](unsigned int row, unsigned int column){
+		return (double)(row + column);
+	}));
+
 	BOOST_TEST(matrices[0] == zero);
 	BOOST_TEST(matrices[1] == single);
 	BOOST_TEST(matrices[2] == row);
