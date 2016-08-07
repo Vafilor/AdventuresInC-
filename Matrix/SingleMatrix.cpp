@@ -66,22 +66,11 @@ Matrix Matrix::operator+(const Matrix& that) const
 		throw invalid_argument("Matrix summation not defined for matrices");
 	}
 
-	if(this->isZeroMatrix())
-	{
-		return Matrix();
-	}
-
-	//TODO - additional is actually simpler - add each entry by entry. 
+	//TODO - addition is actually simpler - add each entry by entry. 
 	//Need to see if can simply do this.
-	if(this->isVector()) 
-	{
-		return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return vectorEntries[i + j] + that.vectorEntries[i + j]; });
-	}
-
-    return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return entries(i,j) + that.entries(i,j); });
+    	return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return (*this)(i,j) + that(i,j); });
 }
 
-//TODO
 Matrix Matrix::operator*(const Matrix& that) const
 {
 	if(this->columns != that.rows)
@@ -192,21 +181,6 @@ Matrix& Matrix::operator=(Matrix&& that)
 
 Matrix operator*(const Matrix& that, double scalar)
 {
-	if(that.isZeroMatrix())
-	{
-		return Matrix();
-	}
-
-	if(that.isVector())
-	{
-		if(that.rows > 1)
-		{
-			return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.entries[i] * scalar; });
-		}
-		
-		return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that.entries[j] * scalar; });
-	}
-	
 	//TODO - can this be simplified?
 	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that(i,j) * scalar; });
 }
@@ -216,11 +190,6 @@ bool operator==(const Matrix & a, const Matrix& b)
 	if(a.rows != b.rows || a.columns != b.columns)
 	{
 		return false;
-	}
-
-	if(a.isZeroMatrix())
-	{
-		return true;
 	}
 
 	for(int i = 0; i < a.length(); i++)
@@ -236,69 +205,30 @@ bool operator==(const Matrix & a, const Matrix& b)
 
 std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
 {
-//TODO
-	if(matrix.isZeroMatrix())
-	{
-		output << "[]";
-		return output;
-	}
-
-	if(matrix.isVector())
-	{
-		for(int i = 0; i < matrix.vectorSize(); i++)
-		{
-			output << matrix.vectorEntries[i];
-			
-			if(matrix.rows > 1)
-			{
-				output << "\n";
-			}
-			else
-			{
-				output << " ";
-			}
-		}
-		
-		return output;
-	}
+	output << "[";
 
 	for(int i = 0; i < matrix.rows; i++)
 	{
+		output << "[";
+
 		for(int j = 0; j < matrix.columns; j++)
 		{
-			output << matrix.entries[i][j] << " ";
+			output << matrix(i,j) << " ";
 		}
 
-		output << endl;
+		output << "]\n";
 	}
 	
+	output << "]";
+
 	return output;
 }
 
 const Matrix& Matrix::operator*=(double scalar)
 {
-	if(this->isZeroMatrix())
+	for(int i = 0; i < this->length(); i++)
 	{
-		return *this;
-	}
-
-	if(this->isVector())
-	{
-		for(int i = 0; i < this->vectorSize(); i++)
-		{
-			this->vectorEntries[i] *= scalar;
-		}
-		
-	}
-	else 
-	{
-		for(int i = 0; i < this->rows; i++)
-		{
-			for(int j = 0; j < this->columns; j++)
-			{
-				this->entries[i][j] *= scalar;
-			}
-		}
+		this->entries[i] *= scalar;
 	}
 	
 	return *this;
@@ -311,27 +241,9 @@ const Matrix& Matrix::operator+=(const Matrix& that)
 		throw invalid_argument("Matrix += not defined with incoming matrix");
 	}
 
-	if(this->isZeroMatrix())
+	for(int i = 0; i < this->length(); i++)
 	{
-		return *this;
-	}
-
-	if(this->isVector())
-	{
-		for(int i = 0; i < this->vectorSize(); i++)
-		{
-			this->vectorEntries[i] += that.vectorEntries[i];
-		}
-	}
-	else
-	{
-		for(int i = 0; i < this->rows; i++)
-		{
-			for(int j = 0; j < this->columns; j++)
-			{
-				this->entries[i][j] += that.entries[i][j];
-			}
-		}
+		this->entries[i] += that.entries[i];
 	}
 	
 	return *this;
@@ -339,17 +251,7 @@ const Matrix& Matrix::operator+=(const Matrix& that)
 
 Matrix Matrix::transpose()
 {
-	if(this->isZeroMatrix())
-	{
-		return Matrix();
-	}
-
-	if(this->isVector())
-	{
-		return Matrix(this->columns, this->rows, [&](unsigned int i, unsigned int j) { return vectorEntries[i + j]; });
-	}
-
-	return Matrix(this->columns, this->rows, [&](unsigned int i, unsigned int j) { return entries[j][i]; });
+	return Matrix(this->columns, this->rows, [&](unsigned int i, unsigned int j) { return (*this)(j,i); });
 }
 
 Matrix Matrix::multiplyEntries(const Matrix& that) const
@@ -359,17 +261,7 @@ Matrix Matrix::multiplyEntries(const Matrix& that) const
 		throw invalid_argument("multiplyEntry - matrices of incompatible size");
 	}
 
-	if(that.isZeroMatrix())
-	{
-		return Matrix();
-	}
-
-	if(this->isVector())
-	{
-		return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return vectorEntries[i + j] * that.vectorEntries[i + j]; });
-	}
-
-	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return entries[i][j] * that.entries[i][j]; });
+	return Matrix(that.getRows(), that.getColumns(), [&](unsigned int i, unsigned int j) { return (*this)(i,j) * that(i,j); });
 }
 
 Matrix Matrix::operator-(const Matrix& that) const
@@ -434,7 +326,6 @@ bool Matrix::isVector() const
 
 unsigned int Matrix::length() const
 {
-	//TODO potential performance issue?
 	return this->rows * this->columns;
 }
 

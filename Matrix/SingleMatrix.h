@@ -14,23 +14,26 @@ class Matrix
         double* entries;
         unsigned int rows;
         unsigned int columns;
+	unsigned int mLength;
 
         bool isVector() const;
         unsigned int length() const;
         bool isZeroMatrix() const;
         
-		void freeEntriesMemory();
+	void freeEntriesMemory();
     
     public:
-		//Constructors & Destructor
-		Matrix();
+
+	//Constructors & Destructor
+	Matrix();
         Matrix(unsigned int rows, unsigned int columns);
         
         template<typename Function>
         Matrix(unsigned int rows, unsigned int columns, Function initializer) 
         {
         	this->rows = rows;
-			this->columns = columns;
+		this->columns = columns;
+		this->length = rows * columns;
         
         	if( rows == 0 && columns == 0) 
         	{
@@ -42,41 +45,36 @@ class Matrix
         	{
         		throw invalid_argument("Can't have a Nx0 or 0xN matrix");
         	}
-
-			if(rows == 1) 
-			{	
-				this->entries = new double[columns];
-				
-				for(int col = 0; col < columns; col++)
-				{
-					this->entries[col] = initializer(0, col);
-				}
-				
-				this->entries = nullptr;
-			} 
-			else if(columns == 1)
+		else if(rows == 1) 
+		{	
+			this->entries = new double[columns];
+			
+			for(int col = 0; col < columns; col++)
 			{
-				this->entries = new double[rows];
-				
-				for(int row = 0; row < rows; row++)
-				{
-					this->entries[row] = initializer(row, 0);
-				}
-				
-				this->entries = nullptr;
+				this->entries[col] = initializer(0, col);
 			}
-			else 
+		} 
+		else if(columns == 1)
+		{
+			this->entries = new double[rows];
+			
+			for(int row = 0; row < rows; row++)
 			{
-				this->entries = new double[rows]
-				
-				for(int i = 0; i < rows; i++) 
+				this->entries[row] = initializer(row, 0);
+			}
+		}
+		else 
+		{
+			this->entries = new double[rows * columns];
+			
+			for(int i = 0; i < rows; i++) 
+			{
+				for(int j = 0; j < columns; j++) 
 				{
-					for(int j = 0; j < columns; j++) 
-					{
-						this->entries(i,j) = initializer(i, j);
-					}
+					(*this)(i,j) = initializer(i, j);
 				}
 			}
+		}
         }
         
         Matrix(const Matrix& that);
@@ -142,7 +140,7 @@ class Matrix
 			{
 				for(int j = 0; j < this->columns; j++)
 				{
-					this->entries(i,j) = function(this->entries(i,j));
+					(*this)(i,j) = function((*this)(i,j));
 				}
 			}
 		}
