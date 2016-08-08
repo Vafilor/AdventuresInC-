@@ -51,11 +51,6 @@ Matrix::~Matrix()
 
 void Matrix::freeEntriesMemory()
 {
-	if(this->isZeroMatrix())
-	{
-		return;
-	}
-
 	delete[] this->entries;
 }
 

@@ -14,8 +14,6 @@ class Matrix
         double* entries;
         unsigned int rows;
         unsigned int columns;
-	unsigned int mLength;
-
         bool isVector() const;
         unsigned int length() const;
         bool isZeroMatrix() const;
@@ -32,8 +30,7 @@ class Matrix
         Matrix(unsigned int rows, unsigned int columns, Function initializer) 
         {
         	this->rows = rows;
-		this->columns = columns;
-		this->length = rows * columns;
+			this->columns = columns;
         
         	if( rows == 0 && columns == 0) 
         	{
@@ -45,36 +42,36 @@ class Matrix
         	{
         		throw invalid_argument("Can't have a Nx0 or 0xN matrix");
         	}
-		else if(rows == 1) 
-		{	
-			this->entries = new double[columns];
+			else if(rows == 1) 
+			{	
+				this->entries = new double[columns];
 			
-			for(int col = 0; col < columns; col++)
-			{
-				this->entries[col] = initializer(0, col);
-			}
-		} 
-		else if(columns == 1)
-		{
-			this->entries = new double[rows];
-			
-			for(int row = 0; row < rows; row++)
-			{
-				this->entries[row] = initializer(row, 0);
-			}
-		}
-		else 
-		{
-			this->entries = new double[rows * columns];
-			
-			for(int i = 0; i < rows; i++) 
-			{
-				for(int j = 0; j < columns; j++) 
+				for(int col = 0; col < columns; col++)
 				{
-					(*this)(i,j) = initializer(i, j);
+					this->entries[col] = initializer(0, col);
+				}
+			} 
+			else if(columns == 1)
+			{
+				this->entries = new double[rows];
+			
+				for(int row = 0; row < rows; row++)
+				{
+					this->entries[row] = initializer(row, 0);
 				}
 			}
-		}
+			else 
+			{
+				this->entries = new double[rows * columns];
+			
+				for(int i = 0; i < rows; i++) 
+				{
+					for(int j = 0; j < columns; j++) 
+					{
+						(*this)(i,j) = initializer(i, j);
+					}
+				}
+			}
         }
         
         Matrix(const Matrix& that);
