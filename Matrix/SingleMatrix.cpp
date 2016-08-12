@@ -63,7 +63,7 @@ Matrix Matrix::operator+(const Matrix& that) const
 
 	//TODO - addition is actually simpler - add each entry by entry. 
 	//Need to see if can simply do this.
-    	return Matrix(this->rows, this->columns, [&](unsigned int i, unsigned int j){ return (*this)(i,j) + that(i,j); });
+    return Matrix(true, this->rows, this->columns, [&](unsigned int i){ return this->entries[i] + that.entries[i]; });
 }
 
 Matrix Matrix::operator*(const Matrix& that) const
@@ -94,28 +94,34 @@ Matrix Matrix::operator*(const Matrix& that) const
 		}
 		else 
 		{
+			unsigned int index = 0;
 			for(int i = 0; i < newRows; i++)
 			{
 				for(int j = 0; j < newColumns; j++)
 				{
-					product(i,j) = this->entries[i] * that.entries[j];
+					product.entries[index] = this->entries[i] * that.entries[j];
+					index++;
 				}
 			}
 		}
 	}
 	else if(that.isVector())
 	{
+		unsigned int index = 0;
 		for(int i = 0; i < this->rows; i++)
 		{
 			for(int j = 0; j < this->columns; j++)
 			{
-				product.entries[i] += (*this)(i,j) * that.entries[j];
+				product.entries[i] += this->entries[index] * that.entries[j];
+				index++;
 			}
 		}
 	}
 	else 
 	{
 		double newValue = 0.0;
+	
+		unsigned int index = 0;
 	
 		for(int i = 0; i < newRows; i++) 
 		{
@@ -126,9 +132,10 @@ Matrix Matrix::operator*(const Matrix& that) const
 					newValue += (*this)(i,k) * that(k,j);
 				}
 			
-				product(i,j) = newValue;
+				product.entries[index] = newValue;
 			
 				newValue = 0.0;
+				index++;
 			}    
 		}
     }
@@ -177,7 +184,7 @@ Matrix& Matrix::operator=(Matrix&& that)
 Matrix operator*(const Matrix& that, double scalar)
 {
 	//TODO - can this be simplified?
-	return Matrix(that.rows, that.columns, [&](unsigned int i, unsigned int j) { return that(i,j) * scalar; });
+	return Matrix(true, that.rows, that.columns, [&](unsigned int i) { return that.entries[i] * scalar; });
 }
 
 bool operator==(const Matrix & a, const Matrix& b)
@@ -256,7 +263,7 @@ Matrix Matrix::multiplyEntries(const Matrix& that) const
 		throw invalid_argument("multiplyEntry - matrices of incompatible size");
 	}
 
-	return Matrix(that.getRows(), that.getColumns(), [&](unsigned int i, unsigned int j) { return (*this)(i,j) * that(i,j); });
+	return Matrix(true, that.getRows(), that.getColumns(), [&](unsigned int i) { return this->entries[i] * that.entries[i]; });
 }
 
 Matrix Matrix::operator-(const Matrix& that) const

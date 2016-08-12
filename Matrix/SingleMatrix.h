@@ -18,7 +18,29 @@ class Matrix
         unsigned int length() const;
         bool isZeroMatrix() const;
         
-	void freeEntriesMemory();
+        //TODO - not sure if this actually offers any performance boost.
+        //TODO constructor is hacky - single serves as a constructor identifier, no other purpose.
+        template<typename Function>
+        Matrix(bool single, unsigned int rows, unsigned int columns, Function initializer)
+        {
+            this->rows = rows;
+			this->columns = columns;
+        
+        	if( rows == 0 && columns == 0) 
+        	{
+        		this->entries = nullptr;        			
+        		return;
+        	} 
+        	
+        	this->entries = new double[rows * columns];
+        	
+        	for(int i = 0; i < (rows * columns); i++)
+        	{
+        		this->entries[i] = initializer(i);
+        	}
+        }
+        
+		void freeEntriesMemory();
     
     public:
 
@@ -63,12 +85,15 @@ class Matrix
 			else 
 			{
 				this->entries = new double[rows * columns];
-			
+				
+				unsigned int index = 0;
+				
 				for(int i = 0; i < rows; i++) 
 				{
 					for(int j = 0; j < columns; j++) 
 					{
-						(*this)(i,j) = initializer(i, j);
+						this->entries[index] = initializer(i, j);
+						index++;
 					}
 				}
 			}
@@ -133,12 +158,9 @@ class Matrix
 		template<typename Function>		
 		void applyFunctionInto(Function function )
 		{		
-			for(int i = 0; i < this->rows; i++)
+			for(int i = 0; i < this->length(); i++)
 			{
-				for(int j = 0; j < this->columns; j++)
-				{
-					(*this)(i,j) = function((*this)(i,j));
-				}
+				this->entries[i] = function(this->entries[i]);
 			}
 		}
 
