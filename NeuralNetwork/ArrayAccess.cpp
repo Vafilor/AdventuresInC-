@@ -5,8 +5,8 @@ using namespace std;
 
 double& accessSingleArray(double array[], int columns, int row, int column);
 double& accessDoubleArray(double** array, int row, int column);
-void testSingleArray(int rows, int columns, int cycles);
-void testDoubleArray(int rows, int columns, int cycles);
+long long testSingleArray(int rows, int columns, int cycles);
+long long testDoubleArray(int rows, int columns, int cycles);
 
 int main(int argc, char* argv[])
 {
@@ -20,17 +20,24 @@ int main(int argc, char* argv[])
 	int columns = atoi(argv[2]);
 	int cycles = atoi(argv[3]);
 
+	cout << "Rows: " << rows << "\n";
+	cout << "Columns: " << columns << "\n";
+	cout << "Cycles: " << cycles << "\n";
+
 	Timer timer;
 
 	timer.mark("Single Array");
-	testSingleArray(rows, columns, cycles);
+	long long singleArray = testSingleArray(rows, columns, cycles);
 	timer.mark();
 
 	timer.mark("Double Array");
-	testDoubleArray(rows, columns, cycles);
+	long long doubleArray = testDoubleArray(rows, columns, cycles);
 	timer.mark();	
 	
 	cout << timer;
+
+	cout << "Single Array Total:" << singleArray << "\n";
+	cout << "Double Array Total:" << doubleArray << "\n";
 }
 
 double& accessSingleArray(double array[], int columns, int row, int column)
@@ -43,7 +50,7 @@ double& accessDoubleArray(double** array, int row, int column)
 	return array[row][column];
 }
 
-void testSingleArray(int rows, int columns, int cycles)
+long long testSingleArray(int rows, int columns, int cycles)
 {
 	double* array = new double[rows * columns];
 
@@ -55,6 +62,8 @@ void testSingleArray(int rows, int columns, int cycles)
 		}
 	}
 
+	long long totalAccess = 0;
+
 	for(int cycle = 0; cycle < cycles; cycle++)
 	{
 		for(int i = 0; i < rows; i++)
@@ -62,12 +71,17 @@ void testSingleArray(int rows, int columns, int cycles)
 			for(int j = 0; j < columns; j++)
 			{
 				accessSingleArray(array, columns, i, j);
+				totalAccess++;
 			}
 		}
 	}
+
+	delete[] array;
+
+	return totalAccess;
 }
 
-void testDoubleArray(int rows, int columns, int cycles)
+long long testDoubleArray(int rows, int columns, int cycles)
 {
 	double** array = new double*[rows];
 
@@ -81,6 +95,8 @@ void testDoubleArray(int rows, int columns, int cycles)
 		}
 	}
 
+	long long totalAccess = 0;
+
 	for(int cycle = 0; cycle < cycles; cycle++)
 	{
 		for(int i = 0; i < rows; i++)
@@ -88,7 +104,17 @@ void testDoubleArray(int rows, int columns, int cycles)
 			for(int j = 0; j < columns; j++)
 			{
 				accessDoubleArray(array, i, j);
+				totalAccess++;
 			}
 		}
 	}
+
+	for(int i = 0; i < rows; i++)
+	{
+		delete[] array[i];
+	}
+
+	delete[] array;
+
+	return totalAccess;
 }
