@@ -41,10 +41,10 @@ class NeuralNetworkData
 	private:
 		struct Datum
 		{
-			const Matrix* input;
-			const Matrix* output;
+			const Matrix input;
+			const Matrix output;
 
-			Datum(const Matrix& inputData, const Matrix& outputData) : input(&inputData), output(&outputData)
+			Datum(const Matrix& inputData, const Matrix& outputData) : input(inputData), output(outputData)
 			{
 			}
 			
@@ -53,25 +53,26 @@ class NeuralNetworkData
 		};
 		
 		vector<Datum> wrappedData;
-
-	protected:
-		vector<Matrix> inputs;
-		vector<Matrix> outputs;
-		
-		//Populates the vector<Datum>, providing convient access to NeuralNetwork 
-		//TODO make this abstract class
-		void wrapData();
-
 		
 	public:
-		NeuralNetworkData() {};
+		NeuralNetworkData(NeuralNetworkDataLoader& dataLoader);
 		~NeuralNetworkData() {};
 
 		//Create a method to convert inputs/outputs into wrapped data - protected
 		//Make sure this isn't virtual - no need to override
 		const Datum& operator[](int i) const { return this->wrappedData[i]; };
+		//TODO redo this method
 		vector<Matrix>::size_type size() const { return this->inputs.size(); };
 };
+
+class NeuralNetworkDataLoader
+{
+	public:
+		virtual Matrix getNextInput() = 0;
+		virtual Matrix getNextOutput() = 0;
+		virtual bool hasNextInput() const = 0;
+		virtual bool hasNextOutput() const = 0;
+}
 
 class NeuralNetwork
 {

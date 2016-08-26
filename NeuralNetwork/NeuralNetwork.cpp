@@ -255,19 +255,14 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 	}
 }
 
-void NeuralNetworkData::wrapData()
-{			
-	if(this->wrappedData.size() != 0)
+NeuralNetworkData(NeuralNetworkDataLoader& dataLoader)
+{
+//Change to while loop - while has next.
+	for(int i = 0; i < dataLoader.size(); i++)
 	{
-		throw logic_error("Can't wrapData more than once");
+		this->wrappedData.push_back(dataLoader.getInput(i), dataLoader.getOutput(i));
 	}
-
-	for(int i = 0; i < this->inputs.size(); i++)
-	{
-		this->wrappedData.push_back(Datum(this->inputs[i], this->outputs[i]));
-	}	
 }
-
 
 unsigned int NeuralNetwork::getLargestRow(const Matrix& matrix)
 {
