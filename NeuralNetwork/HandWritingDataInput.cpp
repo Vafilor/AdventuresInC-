@@ -1,5 +1,8 @@
+#include <iostream>
 #include <fstream>
 #include "HandWritingDataInput.h"
+		
+using namespace std;		
 		
 HandWritingDataInput::HandWritingDataInput(string imageDataFilePath, string labelDataFilePath)
 {
@@ -12,6 +15,12 @@ HandWritingDataInput::HandWritingDataInput(string imageDataFilePath, string labe
 	this->totalItems = this->getTotalItems();
 	
 	//TODO on destruction, make sure to free memory!
+}
+
+HandWritingDataInput::~HandWritingDataInput()
+{
+	delete[] this->imageData;
+	delete[] this->labelData;
 }
 
 unsigned char* HandWritingDataInput::loadFileData(string fileName)
@@ -37,12 +46,12 @@ unsigned char* HandWritingDataInput::loadFileData(string fileName)
 
 unsigned int HandWritingDataInput::getTotalItems()
 {
-	return bytesToInt(this-imageData + 4);
+	return bytesToInt(this->imageData + 4);
 }
 
 Matrix HandWritingDataInput::getNextInput()
 {
-	if(!this->hasNextInput)
+	if(!this->hasNextInput())
 	{
 		throw out_of_range("HandWritingDataInput has no more inputs");
 	}
@@ -53,11 +62,11 @@ Matrix HandWritingDataInput::getNextInput()
 	//Skip magic number, number items, rows, columns, and the already calculated image data
 	const int imagesSkip = 4 * 4 + (this->currentImageIndex * pixels); 
 
-	Matrix input;
+	Matrix input(pixels, 1);
 	
-	for(int i = imagesSkip; i < (imagesSkip + pixels); i++)
+	for(int i = imagesSkip, j = 0; j < pixels; i++, j++)
 	{
-		input(i, 0) = (double)this->imageData[i] / 255.0;
+		input(j, 0) = (double)this->imageData[i] / 255.0;
 	}
 
 	this->currentImageIndex++;
@@ -67,7 +76,7 @@ Matrix HandWritingDataInput::getNextInput()
 
 Matrix HandWritingDataInput::getNextOutput()
 {	
-	if(!this->hasNextOutput)
+	if(!this->hasNextOutput())
 	{
 		throw out_of_range("HandWritingDataInput has no more outputs");
 	}
@@ -89,12 +98,12 @@ bool HandWritingDataInput::hasNextInput() const
 	return this->currentImageIndex < this->totalItems;	
 }
 
-Matrix HandWritingDataInput::getNextOutput()
+bool HandWritingDataInput::hasNextOutput() const
 {
 	return this->currentLabelIndex < this->totalItems;
 }
 
-unsigned int DataInput::bytesToInt(unsigned char input[])
+unsigned int HandWritingDataInput::bytesToInt(unsigned char input[])
 {
 	//char has length of 4 - assumed
 	unsigned int result = 0;
@@ -105,6 +114,8 @@ unsigned int DataInput::bytesToInt(unsigned char input[])
 		std::cout << "Input[" << i << "]:" << (int)input[i] << endl;
 		result += input[i] << ( (3 - i) * 8 );
 	}
+	
+	std::cout << "Returning: " << result << endl;
 	
 	return result;
 }

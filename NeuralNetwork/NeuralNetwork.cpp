@@ -255,12 +255,15 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 	}
 }
 
-NeuralNetworkData(NeuralNetworkDataLoader& dataLoader)
+NeuralNetworkData::NeuralNetworkData()
 {
-//Change to while loop - while has next.
-	for(int i = 0; i < dataLoader.size(); i++)
+}
+
+NeuralNetworkData::NeuralNetworkData(NeuralNetworkDataLoader& dataLoader)
+{
+	while(dataLoader.hasNextInput())
 	{
-		this->wrappedData.push_back(dataLoader.getInput(i), dataLoader.getOutput(i));
+		this->wrappedData.push_back( Datum(dataLoader.getNextInput(), dataLoader.getNextOutput()) );
 	}
 }
 

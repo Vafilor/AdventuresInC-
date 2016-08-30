@@ -32,6 +32,15 @@ struct SigmoidPrime
 	double operator()(double value);
 };
 
+class NeuralNetworkDataLoader
+{
+	public:
+		virtual Matrix getNextInput() = 0;
+		virtual Matrix getNextOutput() = 0;
+		virtual bool hasNextInput() const = 0;
+		virtual bool hasNextOutput() const = 0;
+};
+
 /*
  * Utility class to help interact with Neural Network Training Data.
  *
@@ -48,13 +57,14 @@ class NeuralNetworkData
 			{
 			}
 			
-			const Matrix& getInput() const { return *this->input; };
-			const Matrix& getOutput() const { return *this->output; };
+			const Matrix& getInput() const { return this->input; };
+			const Matrix& getOutput() const { return this->output; };
 		};
 		
 		vector<Datum> wrappedData;
 		
 	public:
+		NeuralNetworkData();
 		NeuralNetworkData(NeuralNetworkDataLoader& dataLoader);
 		~NeuralNetworkData() {};
 
@@ -62,17 +72,8 @@ class NeuralNetworkData
 		//Make sure this isn't virtual - no need to override
 		const Datum& operator[](int i) const { return this->wrappedData[i]; };
 		//TODO redo this method
-		vector<Matrix>::size_type size() const { return this->inputs.size(); };
+		vector<Matrix>::size_type size() const { return this->wrappedData.size(); };
 };
-
-class NeuralNetworkDataLoader
-{
-	public:
-		virtual Matrix getNextInput() = 0;
-		virtual Matrix getNextOutput() = 0;
-		virtual bool hasNextInput() const = 0;
-		virtual bool hasNextOutput() const = 0;
-}
 
 class NeuralNetwork
 {

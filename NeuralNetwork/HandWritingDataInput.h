@@ -5,6 +5,8 @@
 #include "Matrix.h"
 #include "NeuralNetwork.h"
 
+using std::string;
+
 class HandWritingDataInput : public NeuralNetworkDataLoader
 {
 	private:
@@ -23,6 +25,7 @@ class HandWritingDataInput : public NeuralNetworkDataLoader
 
 	public:
 		HandWritingDataInput(string imageDataFilePath, string labelDataFilePath);
+		~HandWritingDataInput();
 		
 		virtual Matrix getNextInput();
 		virtual Matrix getNextOutput();
