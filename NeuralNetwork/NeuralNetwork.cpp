@@ -255,6 +255,18 @@ void NeuralNetwork::calculateZsAndActivations(const Matrix& input, vector<Matrix
 	}
 }
 
+NeuralNetworkData::Datum::Datum(Matrix&& inputData, Matrix&& outputData)
+{				
+	this->input = std::move(inputData);
+	this->output = std::move(outputData);
+}
+
+NeuralNetworkData::Datum::Datum(Datum&& that)
+{
+	this->input = std::move(that.input);
+	this->output = std::move(that.output);
+}
+
 NeuralNetworkData::NeuralNetworkData()
 {
 }

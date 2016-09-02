@@ -48,17 +48,18 @@ class NeuralNetworkDataLoader
 class NeuralNetworkData
 {
 	private:
-		struct Datum
+		class Datum
 		{
-			const Matrix input;
-			const Matrix output;
+			private:
+				Matrix input;
+				Matrix output;
 
-			Datum(const Matrix& inputData, const Matrix& outputData) : input(inputData), output(outputData)
-			{
-			}
+			public:
+				Datum(Matrix&& inputData, Matrix&& outputData);
+				Datum(Datum&& that); 		
 			
-			const Matrix& getInput() const { return this->input; };
-			const Matrix& getOutput() const { return this->output; };
+				const Matrix& getInput() const { return this->input; };
+				const Matrix& getOutput() const { return this->output; };
 		};
 		
 		vector<Datum> wrappedData;
