@@ -25,6 +25,7 @@ class HandWritingDataInput : public NeuralNetworkDataLoader
 
 	public:
 		HandWritingDataInput(string imageDataFilePath, string labelDataFilePath);
+		HandWritingDataInput( HandWritingDataInput&& that);
 		~HandWritingDataInput();
 		
 		virtual Matrix getNextInput();

@@ -271,7 +271,7 @@ NeuralNetworkData::NeuralNetworkData()
 {
 }
 
-NeuralNetworkData::NeuralNetworkData(NeuralNetworkDataLoader& dataLoader)
+NeuralNetworkData::NeuralNetworkData(NeuralNetworkDataLoader&& dataLoader)
 {
 	while(dataLoader.hasNextInput())
 	{

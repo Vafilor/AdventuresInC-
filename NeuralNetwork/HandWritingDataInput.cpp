@@ -12,9 +12,19 @@ HandWritingDataInput::HandWritingDataInput(string imageDataFilePath, string labe
 	this->imageData = this->loadFileData(imageDataFilePath);
 	this->labelData = this->loadFileData(labelDataFilePath);
 
-	this->totalItems = this->getTotalItems();
+	this->totalItems = this->getTotalItems();	
+}
+
+HandWritingDataInput::HandWritingDataInput( HandWritingDataInput&& that)
+{
+	this->imageData = that.imageData;
+	this->labelData = that.labelData;
+	this->currentImageIndex = that.currentImageIndex;
+	this->currentLabelIndex = that.currentLabelIndex;
+	this->totalItems = that.totalItems;
 	
-	//TODO on destruction, make sure to free memory!
+	that.imageData = nullptr;
+	that.labelData = nullptr;
 }
 
 HandWritingDataInput::~HandWritingDataInput()
@@ -103,19 +113,14 @@ bool HandWritingDataInput::hasNextOutput() const
 	return this->currentLabelIndex < this->totalItems;
 }
 
+//Pre-Condition: input has a length of 4, big-endian.
 unsigned int HandWritingDataInput::bytesToInt(unsigned char input[])
 {
-	//char has length of 4 - assumed
-	unsigned int result = 0;
-	
-	for(int i = 0; i < 4; i++)
-	{
-	//TODO remove commentary
-		std::cout << "Input[" << i << "]:" << (int)input[i] << endl;
-		result += input[i] << ( (3 - i) * 8 );
-	}
-	
-	std::cout << "Returning: " << result << endl;
-	
-	return result;
+	return (unsigned int) 
+						 (
+							input[0] << 24 | 
+							input[1] << 16 |
+							input[2] << 8  |
+							input[3]
+						 );
 }

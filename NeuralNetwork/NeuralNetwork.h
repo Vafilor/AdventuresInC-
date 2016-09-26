@@ -66,7 +66,7 @@ class NeuralNetworkData
 		
 	public:
 		NeuralNetworkData();
-		NeuralNetworkData(NeuralNetworkDataLoader& dataLoader);
+		NeuralNetworkData(NeuralNetworkDataLoader&& dataLoader);
 		~NeuralNetworkData() {};
 
 		//Create a method to convert inputs/outputs into wrapped data - protected
