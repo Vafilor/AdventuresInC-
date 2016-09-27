@@ -4,8 +4,9 @@
 #include <cstdlib>
 #include <iostream> //For debugging
 #include <cmath>
+#include <algorithm>
+#include <random>
 #include "Timer.h"
-
 
 using namespace std;
 
@@ -82,8 +83,7 @@ void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epoc
 
 	for(int i = 1; i <= epochs; i++)
 	{
-		//TODO shuffle partition
-		//TODO for each loop
+		random_shuffle(trainingDataPartition.begin(), trainingDataPartition.end() );
 		
 		timer.mark("Epoch");
 		
@@ -149,6 +149,9 @@ void NeuralNetwork::partition(int start, int end, int size, vector <pair<int,int
 
 Matrix NeuralNetwork::gaussianDistribution(unsigned rows, unsigned columns)
 {
+	default_random_engine generator;
+	normal_distribution<double> distribution(0.0, 1.0);
+
 	Matrix matrix(rows, columns);
 
 	double value = 0.0;
@@ -157,7 +160,7 @@ Matrix NeuralNetwork::gaussianDistribution(unsigned rows, unsigned columns)
 	{
 		for(int j = 0; j < columns; j++)
 		{
-			value = 0;//(double)rand() / (double)RAND_MAX; //TODO
+			value = distribution(generator);
 			matrix(i, j) = value;
 		}
 	}	
