@@ -148,6 +148,7 @@ class Matrix
 		friend bool operator==(const Matrix & a, const Matrix & b);
 		//TODO can ostream not be const input and output? Either?
 		friend std::ostream & operator<<(std::ostream & output, const Matrix & matrix);
+		friend std::istream & operator>>(std::istream& input, Matrix& matrix);
 
 
 		/*

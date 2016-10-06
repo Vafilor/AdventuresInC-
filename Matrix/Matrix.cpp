@@ -3,7 +3,7 @@
 
 #include "Matrix.h"
 #include <stdexcept>
-#include <iostream> //For debugging
+#include <iostream>
 #include <string>
 using namespace std; //For debugging
 
@@ -205,25 +205,42 @@ bool operator==(const Matrix & a, const Matrix& b)
 	return true;
 }
 
-std::ostream & operator<<(std::ostream& output, const Matrix& matrix)
+ostream & operator<<(ostream& output, const Matrix& matrix)
 {
-	output << "[";
-
+	output << matrix.getRows() << " " << matrix.getColumns() << "\n";
+	 
 	for(int i = 0; i < matrix.rows; i++)
 	{
-		output << "[";
-
 		for(int j = 0; j < matrix.columns; j++)
 		{
 			output << matrix(i,j) << " ";
 		}
+		
+		output << "\n";
+	}
+		
+	return output;
+}
 
-		output << "]\n";
+istream & operator>>(istream& input, Matrix& matrix)
+{
+	unsigned int rows = 0;
+	unsigned int columns = 0;
+	
+	input >> rows;
+	input >> columns;
+	
+	matrix = Matrix(rows, columns);
+	
+	for(int i = 0; i < matrix.getRows(); i++)
+	{
+		for(int j = 0; j < matrix.getColumns(); j++)
+		{
+			input >> matrix(i,j);
+		}
 	}
 	
-	output << "]";
-
-	return output;
+	return input;
 }
 
 const Matrix& Matrix::operator*=(double scalar)
