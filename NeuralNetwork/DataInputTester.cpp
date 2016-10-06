@@ -10,6 +10,7 @@
 #include "NeuralNetwork.h"
 #include "HandWriting.h"
 #include "Timer.h"
+#include "HandWritingDataInput.h"
 
 using namespace std;
 
@@ -27,9 +28,9 @@ int main()
 	timer.setVerbose(true, &cout);
 	
 	timer.mark("Load Data");
-		
-	HandWriting trainingData(imageTrainingPath, labelTrainingPath);
-	HandWriting testingData(imageTestingPath, labelTestingPath);
+	
+	NeuralNetworkData trainingData( HandWritingDataInput(imageTrainingPath, labelTrainingPath) );
+	NeuralNetworkData testingData ( HandWritingDataInput(imageTestingPath, labelTestingPath) );
 	
 	timer.mark();
 	
@@ -41,12 +42,12 @@ int main()
 	NeuralNetwork network(neurons);	
 	
 	timer.mark("Net Training");
-	
+		
 	network.SGD(trainingData, 30, 10, 3.0, testingData );		
 
 	timer.mark();
 
-	cout << "Program Done" << endl;	
+	cout << "Program Done" << endl;	 
 	
 	return 0;
 }
