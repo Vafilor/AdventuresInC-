@@ -11,22 +11,41 @@ using std::invalid_argument;
 class Matrix
 {
     private:
-        double** entries;
-        double*  vectorEntries;
+        double* entries;
         unsigned int rows;
         unsigned int columns;
-
         bool isVector() const;
-        unsigned int vectorSize() const;
+        unsigned int length() const;
         bool isZeroMatrix() const;
         
-		void freeEntriesMemory();
+        //TODO - not sure if this actually offers any performance boost.
+        //TODO constructor is hacky - single serves as a constructor identifier, no other purpose.
+        template<typename Function>
+        Matrix(bool single, unsigned int rows, unsigned int columns, Function initializer)
+        {
+            this->rows = rows;
+			this->columns = columns;
         
+        	if( rows == 0 && columns == 0) 
+        	{
+        		this->entries = nullptr;        			
+        		return;
+        	} 
+        	
+        	this->entries = new double[rows * columns];
+        	
+        	for(int i = 0; i < (rows * columns); i++)
+        	{
+        		this->entries[i] = initializer(i);
+        	}
+        }
+        
+		void freeEntriesMemory();
+    
     public:
 
-		//Constructors & Destructor
-
-		Matrix();
+	//Constructors & Destructor
+	Matrix();
         Matrix(unsigned int rows, unsigned int columns);
         
         template<typename Function>
@@ -37,8 +56,7 @@ class Matrix
         
         	if( rows == 0 && columns == 0) 
         	{
-        		this->entries = nullptr;
-        		this->vectorEntries = nullptr;
+        		this->entries = nullptr;        		
         		
         		return;
         	} 
@@ -46,41 +64,36 @@ class Matrix
         	{
         		throw invalid_argument("Can't have a Nx0 or 0xN matrix");
         	}
-    
-
-			if(rows == 1) 
+			else if(rows == 1) 
 			{	
-				this->vectorEntries = new double[columns];
-				
+				this->entries = new double[columns];
+			
 				for(int col = 0; col < columns; col++)
 				{
-					this->vectorEntries[col] = initializer(0, col);
+					this->entries[col] = initializer(0, col);
 				}
-				
-				this->entries = nullptr;
 			} 
 			else if(columns == 1)
 			{
-				this->vectorEntries = new double[rows];
-				
+				this->entries = new double[rows];
+			
 				for(int row = 0; row < rows; row++)
 				{
-					this->vectorEntries[row] = initializer(row, 0);
+					this->entries[row] = initializer(row, 0);
 				}
-				
-				this->entries = nullptr;
 			}
 			else 
 			{
-				this->entries = new double*[rows];
+				this->entries = new double[rows * columns];
+				
+				unsigned int index = 0;
 				
 				for(int i = 0; i < rows; i++) 
 				{
-					this->entries[i] = new double[columns]; 
-	
 					for(int j = 0; j < columns; j++) 
 					{
-						this->entries[i][j] = initializer(i, j);
+						this->entries[index] = initializer(i, j);
+						index++;
 					}
 				}
 			}
@@ -90,7 +103,6 @@ class Matrix
         Matrix(Matrix&& that);
         ~Matrix();
         
-
 		//Getters & Setters
         unsigned int getRows() const;
         unsigned int getColumns() const;
@@ -145,23 +157,10 @@ class Matrix
 		//TODO can I move these definitions into .cpp file?
 		template<typename Function>		
 		void applyFunctionInto(Function function )
-		{
-			if(this->isVector())
+		{		
+			for(int i = 0; i < this->length(); i++)
 			{
-				for(int i = 0; i < this->vectorSize(); i++)
-				{
-					this->vectorEntries[i] = function(this->vectorEntries[i]);
-				}
-				
-				return;
-			}
-		
-			for(int i = 0; i < this->rows; i++)
-			{
-				for(int j = 0; j < this->columns; j++)
-				{
-					this->entries[i][j] = function(this->entries[i][j]);
-				}
+				this->entries[i] = function(this->entries[i]);
 			}
 		}
 
