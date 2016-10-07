@@ -15,6 +15,7 @@
 using std::vector;
 using std::pair;
 using std::ostream;
+using std::istream;
 
 typedef vector<int>::size_type v_int;
 typedef vector<Matrix>::size_type m_int;
@@ -151,6 +152,7 @@ class NeuralNetwork
 		void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData );		
 
 		friend ostream& operator<<(ostream& os, NeuralNetwork& network);
+		friend istream& operator>>(istream& input, NeuralNetwork& network);
 };
 
 #endif

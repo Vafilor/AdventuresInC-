@@ -2,7 +2,7 @@
 #include "Matrix.h"
 #include <stdexcept>
 #include <cstdlib>
-#include <iostream> //For debugging
+#include <iostream> 
 #include <cmath>
 #include <algorithm>
 #include <random>
@@ -31,6 +31,7 @@ NeuralNetwork::NeuralNetwork(const vector<int>& layerSizes) //TODO variadic cons
 
 NeuralNetwork::~NeuralNetwork()
 {
+	this->sizes.clear();
 	this->biases.clear();
 	this->weights.clear();
 }
@@ -316,23 +317,55 @@ int NeuralNetwork::getLastNonZeroRow(const Matrix& matrix)
 
 ostream& operator<<(ostream& os, NeuralNetwork& network)
 {
-	os << "Weights" << endl << endl;
+	os << network.sizes.size() << "\n";
+	
+	for(int size : network.sizes)
+	{
+		os << size << " ";
+	}
+	
+	os << "\n";
 
 	for(Matrix& matrix : network.weights)
 	{
-		os << matrix << endl << endl;
+		os << matrix << "\n";
 	}
-
-	os << "Biases" << endl << endl;
 
 	for(Matrix& matrix : network.biases)
 	{
-		os << matrix << endl << endl;
+		os << matrix << "\n";
 	}
 
 	return os;
 }
 
+istream& operator>>(istream& input, NeuralNetwork& network)
+{
+	int numberOfLayers = 0;
+	
+	input >> numberOfLayers;
+
+	vector<int> layerSizes(numberOfLayers);
+	
+	for(int i = 0; i < layerSizes.size(); i++)
+	{
+		input >> layerSizes[i];
+	}
+	
+	network = NeuralNetwork(layerSizes);
+	
+	for(Matrix& matrix : network.weights)
+	{
+		input >> matrix;
+	}
+	
+	for(Matrix& matrix : network.biases)
+	{
+		input >> matrix;
+	}
+	
+	return input;
+}
 
 double sigmoid(double value)
 {
