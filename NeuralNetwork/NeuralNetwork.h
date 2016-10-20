@@ -138,6 +138,7 @@ class NeuralNetwork
 		void calculateZsAndActivations(const Matrix& input, vector<Matrix>& zs, vector<Matrix>& activations);
 		
 	public:
+		NeuralNetwork();
 		NeuralNetwork(const vector<int>& layerSizes);
 		~NeuralNetwork();
 	
@@ -145,13 +146,13 @@ class NeuralNetwork
 		 * input is expected to be a rows x 1 matrix. Input to the neural network. 
 		 * Returns the result from the network.
 		*/
-		Matrix feedForward(const Matrix& input);
-		int evaluate(const NeuralNetworkData& data);
+		Matrix feedForward(const Matrix& input) const;
+		int evaluate(const NeuralNetworkData& data) const;
 		
 		void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta);
 		void SGD(const NeuralNetworkData& trainingData, unsigned int epochs, unsigned int miniBatchSize, double eta, const NeuralNetworkData& testData );		
 
-		friend ostream& operator<<(ostream& os, NeuralNetwork& network);
+		friend ostream& operator<<(ostream& os, const NeuralNetwork& network);
 		friend istream& operator>>(istream& input, NeuralNetwork& network);
 };
 

@@ -205,7 +205,6 @@ bool operator==(const Matrix & a, const Matrix& b)
 	return true;
 }
 
-//TODO precision
 ostream & operator<<(ostream& output, const Matrix& matrix)
 {
 	output << matrix.getRows() << " " << matrix.getColumns() << "\n";

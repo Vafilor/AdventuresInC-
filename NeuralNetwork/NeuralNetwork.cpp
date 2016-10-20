@@ -10,11 +10,15 @@
 
 using namespace std;
 
+NeuralNetwork::NeuralNetwork()
+{
+}
 
 NeuralNetwork::NeuralNetwork(const vector<int>& layerSizes) //TODO variadic constructor?
 {
 	for(int i = 0; i < layerSizes.size(); i++)
 	{
+		cout << "Layer Size " << i << " " << layerSizes[i] << "\n";
 		this->sizes.push_back(layerSizes[i]); //TODO deep copy instead? STL?
 	}
 
@@ -38,7 +42,7 @@ NeuralNetwork::~NeuralNetwork()
 
 
 //TODO note exceptions thrown
-Matrix NeuralNetwork::feedForward(const Matrix& input)
+Matrix NeuralNetwork::feedForward(const Matrix& input) const
 {	
 	Matrix result = input;
 
@@ -51,7 +55,7 @@ Matrix NeuralNetwork::feedForward(const Matrix& input)
     return result;
 }
 
-int NeuralNetwork::evaluate(const NeuralNetworkData& data)
+int NeuralNetwork::evaluate(const NeuralNetworkData& data) const
 {
 	unsigned int totalCorrect = 0;
 	Matrix result;
@@ -315,7 +319,7 @@ int NeuralNetwork::getLastNonZeroRow(const Matrix& matrix)
     return -1;
 }
 
-ostream& operator<<(ostream& os, NeuralNetwork& network)
+ostream& operator<<(ostream& os, const NeuralNetwork& network)
 {
 	os << network.sizes.size() << "\n";
 	
@@ -326,12 +330,12 @@ ostream& operator<<(ostream& os, NeuralNetwork& network)
 	
 	os << "\n";
 
-	for(Matrix& matrix : network.weights)
+	for(const Matrix& matrix : network.weights)
 	{
 		os << matrix << "\n";
 	}
 
-	for(Matrix& matrix : network.biases)
+	for(const Matrix& matrix : network.biases)
 	{
 		os << matrix << "\n";
 	}
