@@ -1,3 +1,2 @@
-Matrix: Matrix.cpp tester.cpp
-	g++ -std=c++11 Matrix.cpp tester.cpp -o matrix_tester.out
-	./matrix_tester.out
+matrix.o : Matrix.h  Matrix.cpp
+	g++ -std=c++11 -O2 -c  Matrix.cpp 
