@@ -6,7 +6,6 @@
 #include <cmath>
 #include <algorithm>
 #include <random>
-#include "Timer.h"
 
 using namespace std;
 
@@ -18,7 +17,6 @@ NeuralNetwork::NeuralNetwork(const vector<int>& layerSizes) //TODO variadic cons
 {
 	for(int i = 0; i < layerSizes.size(); i++)
 	{
-		cout << "Layer Size " << i << " " << layerSizes[i] << "\n";
 		this->sizes.push_back(layerSizes[i]); //TODO deep copy instead? STL?
 	}
 
@@ -83,21 +81,14 @@ void NeuralNetwork::SGD(const NeuralNetworkData& trainingData, unsigned int epoc
 	vector <pair<int,int> > trainingDataPartition;
     partition(0, trainingData.size(), miniBatchSize, trainingDataPartition);
 
-	Timer timer;
-	timer.setVerbose(true, &cout);
-
 	for(int i = 1; i <= epochs; i++)
 	{
 		random_shuffle(trainingDataPartition.begin(), trainingDataPartition.end() );
-		
-		timer.mark("Epoch");
 		
 		for( pair<int,int> subset : trainingDataPartition )
 		{
 			this->updateMiniBatch(trainingData, subset, eta);
 		}
-		
-		timer.mark();
 	
 		if(testData.size() > 0)
 		{
