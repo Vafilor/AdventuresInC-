@@ -18,7 +18,10 @@ class Chatty
 		Chatty();
 		
 		//Constructor
-		Chatty(const string& name);
+		//Explicit here disallows creating a Chatty object from a string.
+		//Without it, the following is possible: Chatty test = string("test")
+		//This would also apply to cases where we expect a Chatty object in a function, but pass in a string.
+		explicit Chatty(const string& name);
 
 		//Copy Constructor
 		//Used when copying one object from another Chatty a; Chatty b(a);
