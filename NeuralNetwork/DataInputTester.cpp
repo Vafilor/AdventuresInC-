@@ -17,12 +17,18 @@ using namespace std;
 
 //TODO - rename this to ImageData tester or similar - this is a specific use of Neural Network. Classes for this purpose are defined in a header 
 //and defined - this "controller" makes use of them
-int main()
+int main(int argc, char* argv[])
 {
-	string labelTrainingPath = "";
-	string imageTrainingPath = "";
-	string imageTestingPath = "";
-	string labelTestingPath = "";
+	if(argc < 5) 
+	{
+		cout << "Expected \"Label Training File Path\", \"Image Training Path\", \"Image Testing Path\", \"Label Testing Path\"\n";
+		return 1;
+	}
+	
+	string labelTrainingPath = argv[1];
+	string imageTrainingPath = argv[2];
+	string imageTestingPath = argv[3];
+	string labelTestingPath = argv[4];
 		
 	Timer timer;
 	timer.setVerbose(true, &cout);
